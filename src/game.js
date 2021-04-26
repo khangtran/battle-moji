@@ -9,6 +9,18 @@ var data_sy;
 
 let path_data = "/res/data.json";
 
+let Time = { deltaTime: 0, time: 0 };
+let gameStart = false;
+let main_thread_id;
+let level_symbol = [],
+  level = 1,
+  count_sy;
+let swapn_list = [];
+let score = 0;
+let create_sy_id;
+
+import GameSymbol from "./symbol";
+
 class GameCore {
   async loaded() {
     this.setup_ui();
@@ -33,6 +45,7 @@ class GameCore {
     cv.height = h;
 
     ctx = cv.getContext("2d");
+    window.ctx = ctx;
     cv.onmousemove = ev => {
       this.draw(ev);
     };
@@ -60,13 +73,13 @@ class GameCore {
 
     cv.ontouchstart = ev => {
       ev.preventDefault();
-
-      if (ev.touches[0].clientY < h - 500) {
+      let lineBottom = h / 3;
+      if (ev.touches[0].clientY < h - lineBottom) {
         // alert draw area
         ctx.beginPath();
         ctx.lineWidth = "1";
         ctx.strokeStyle = "red";
-        ctx.rect(0, h - 500, w, 500);
+        ctx.rect(0, h - lineBottom, w, lineBottom);
         ctx.stroke();
         ctx.closePath();
         return;
@@ -103,7 +116,7 @@ class GameCore {
     if (!isMouseDown) return;
 
     ctx.beginPath();
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "black";
 
@@ -140,7 +153,7 @@ class GameCore {
 
   startGame() {
     level_symbol = this.createLevel(1, 10);
-    create_sy_id = spawnSymbol(1500);
+    create_sy_id = this.spawnSymbol(1500);
     count_sy = level_symbol.length - 1;
 
     this.showLobby(true);
@@ -277,6 +290,7 @@ class GameCore {
       return { ...item, index: index };
     });
     let array = remap.filter(item => item.name === x.key);
+    if (array.length === 0) return;
     score += array[0].score * array.length;
 
     let str_x = array.length === 1 ? "" : `x${array.length}`;
@@ -304,15 +318,6 @@ class GameCore {
   }
 }
 
-let Time = { deltaTime: 0, time: 0 };
-let gameStart = false;
-let main_thread_id;
-let level_symbol = [],
-  level = 1,
-  count_sy;
-let swapn_list = [];
-let score = 0;
-let create_sy_id;
 let symbol_data = [
   {
     name: "xuống",
@@ -390,9 +395,9 @@ function ArrayMax(array) {
   return array[index];
 }
 
-function format_time(x){
-  let xx = a > 3
-  return a
+function format_time(x) {
+  let xx = a > 3;
+  return a;
 }
 
 export default new GameCore();
