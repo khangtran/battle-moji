@@ -142,12 +142,13 @@ class GameCore {
       if (level_symbol.length === 0 || count_sy === 0) {
         clearInterval(create_sy_id);
         setTimeout(() => {
-          this.showLobby(false);
+          showLobby(false);
         }, 1000);
       }
       Time.time += 33 / 1000;
 
-      HelperTextElement("lb-detect", Time.time);
+      let time = format_time(Time.time);
+      HelperTextElement("lb-time", time);
     }, 33);
   }
 
@@ -156,14 +157,14 @@ class GameCore {
     create_sy_id = this.spawnSymbol(1500);
     count_sy = level_symbol.length - 1;
 
-    this.showLobby(true);
+    showLobby(true);
     gameStart = true;
 
     console.log("start_game", level_symbol, count_sy);
   }
 
   endGame() {
-    this.showLobby(true);
+    showLobby(true);
     gameStart = false;
 
     console.log("end_game", level_symbol, count_sy);
@@ -395,9 +396,13 @@ function ArrayMax(array) {
   return array[index];
 }
 
-function format_time(x) {
-  let xx = a > 3;
-  return a;
+function format_time(ms) {
+  let total_minutes = parseInt(Math.floor(ms / 60));
+
+  let s = parseInt(ms % 60);
+  let m = parseInt(total_minutes % 60);
+
+  return `${m > 10 ? m : `0${m}`}:${s > 10 ? s : `0${s}`}`;
 }
 
 export default new GameCore();
