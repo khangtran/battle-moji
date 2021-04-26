@@ -8,10 +8,6 @@ let draw_path = [];
 var data_sy;
 
 class GameCore {
-  test() {
-    console.log("test class");
-  }
-
   loaded() {
     window.onload = async ev => {
       setup_ui();
@@ -26,12 +22,6 @@ class GameCore {
   }
 
   setup_ui() {
-    let screenGame = new Game("ui-game");
-    let screenLobby = new Lobby("ui-lobby");
-
-    ScreenManagerInstance.add("game", screenGame);
-    ScreenManagerInstance.add("lobby", screenLobby);
-
     HelperButton("bt-play", () => {
       startGame();
     });
@@ -111,6 +101,7 @@ class GameCore {
     let pos = { x: curx, y: cury };
     return pos;
   }
+
   draw(e) {
     if (!isMouseDown) return;
 
@@ -127,6 +118,7 @@ class GameCore {
 
     draw_path.push(position);
   }
+
   clearFrame(after) {
     gameTimeId = setTimeout(() => {
       ctx.clearRect(0, 0, w, h);
@@ -400,4 +392,4 @@ function ArrayMax(array) {
   return array[index];
 }
 
-export default GameCore();
+export default new GameCore();

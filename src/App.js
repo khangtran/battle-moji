@@ -1,15 +1,15 @@
 import React from "react";
 import "./style.css";
-import GameCore from "./GameCore";
+import GameCore from "./game";
 
 export default class App extends React.Component {
   componentDidMount() {
-    GameCore.test();
+    GameCore.loaded();
   }
 
   render() {
     return (
-      <div>
+      <div id="main">
         <div id="ui-game">
           <canvas id="canvas" />
 

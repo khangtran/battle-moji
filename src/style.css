@@ -2,8 +2,17 @@
   position: absolute;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#main {
+  width: 100%;
+  height: 100%;
 }
 
 .score {
@@ -16,8 +25,8 @@ body {
 
 .detect {
   position: absolute;
-  top: 8;
-  right: 8;
+  top: 8px;
+  right: 8px;
   width: 200px;
   font-size: 30px;
 }
