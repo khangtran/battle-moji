@@ -1,1 +1,36 @@
-<div id="root"></div>
+<html>
+
+<head>
+    <title>Battle Moji</title>
+</head>
+<script src="/game.js"></script>
+<script src="/symbol.js"></script>
+<link rel="stylesheet" href="style.css">
+<!-- <script type="text/javascript" src="data.json"></script> -->
+
+<body style="margin:0">
+    <div id='ui-game'>
+        <canvas id="canvas" style="border: 1px solid lightgray;">
+
+        </canvas>
+
+        <div class="ui score">
+            <span id="lb-level">Level 1: 10</span>
+            </br>
+            <span id="lb-score">Điểm 0</span>
+            </br>
+            <span id="lb-mutil"></span>
+        </div>
+
+        <div class="ui detect"">
+            <span id=" lb-detect">Nhận dạng ...</span>
+        </div>
+    </div>
+
+
+    <div id='ui-lobby' class='ui lobby'>
+        <button id='bt-play' class="bt-play"">Tìm trận</button>
+    </div>
+</body>
+
+</html>
