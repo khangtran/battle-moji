@@ -7,23 +7,23 @@ let w = window.innerWidth - 2,
 let draw_path = [];
 var data_sy;
 
+let path_data = "/res/data.json";
+
 class GameCore {
-  loaded() {
-    window.onload = async ev => {
-      setup_ui();
-      setup_canvas();
-      // draw_backgroud()
+  async loaded() {
+    this.setup_ui();
+    this.setup_canvas();
+    // draw_backgroud()
+    data_sy = await this.loadFile(path_data);
+    console.log("data", data_sy);
 
-      main_thread();
-
-      data_sy = await loadFile("/res/data.json");
-      console.log("data", data_sy);
-    };
+    console.log("load data");
   }
 
   setup_ui() {
     HelperButton("bt-play", () => {
-      startGame();
+      this.startGame();
+      this.main_thread();
     });
   }
 
@@ -34,31 +34,28 @@ class GameCore {
 
     ctx = cv.getContext("2d");
     cv.onmousemove = ev => {
-      draw(ev);
+      this.draw(ev);
     };
 
     cv.onmousedown = ev => {
-      position = mouseToCanvas(ev);
+      position = this.mouseToCanvas(ev);
       isMouseDown = true;
     };
 
     cv.onmouseup = ev => {
-      position = mouseToCanvas(ev);
+      position = this.mouseToCanvas(ev);
       isMouseDown = false;
 
-      let sy = detectSymbol(draw_path);
+      let sy = this.detectSymbol(draw_path);
       console.log(`result`, JSON.stringify(sy));
-      let result = recogintionToObject(sy);
+      let result = this.recogintionToObject(sy);
       HelperTextElement(
         "lb-detect",
         `${result.key}:${result.percent}:${sy.length}`
       );
-      result.percent > 80 && killSymbol(result);
+      result.percent > 80 && this.killSymbol(result);
 
-      let txt = HelperElement("text");
-      txt.value = JSON.stringify(sy);
-
-      clearFrame(100);
+      this.clearFrame(100);
     };
 
     cv.ontouchstart = ev => {
@@ -74,13 +71,13 @@ class GameCore {
         ctx.closePath();
         return;
       }
-      position = mouseToCanvas(ev);
+      position = this.mouseToCanvas(ev);
       isMouseDown = true;
     };
 
     cv.ontouchmove = ev => {
       ev.preventDefault();
-      draw(ev);
+      this.draw(ev);
     };
 
     cv.ontouchend = ev => {
@@ -111,7 +108,7 @@ class GameCore {
     ctx.strokeStyle = "black";
 
     ctx.moveTo(position.x, position.y);
-    position = mouseToCanvas(e);
+    position = this.mouseToCanvas(e);
     ctx.lineTo(position.x, position.y);
 
     ctx.stroke();
@@ -132,7 +129,7 @@ class GameCore {
       if (level_symbol.length === 0 || count_sy === 0) {
         clearInterval(create_sy_id);
         setTimeout(() => {
-          showLobby(false);
+          this.showLobby(false);
         }, 1000);
       }
       Time.time += 33 / 1000;
@@ -142,18 +139,18 @@ class GameCore {
   }
 
   startGame() {
-    level_symbol = createLevel(1, 10);
+    level_symbol = this.createLevel(1, 10);
     create_sy_id = spawnSymbol(1500);
     count_sy = level_symbol.length - 1;
 
-    showLobby(true);
+    this.showLobby(true);
     gameStart = true;
 
     console.log("start_game", level_symbol, count_sy);
   }
 
   endGame() {
-    showLobby(true);
+    this.showLobby(true);
     gameStart = false;
 
     console.log("end_game", level_symbol, count_sy);
@@ -162,7 +159,7 @@ class GameCore {
   resetGame() {
     count_sy = 0;
     clearInterval(create_sy_id);
-    clearFrame(0);
+    this.clearFrame(0);
   }
 
   createLevel(level, maxQt) {
@@ -300,6 +297,7 @@ class GameCore {
   }
 
   async loadFile(path) {
+    console.log(">> loadfile", path);
     let response = await fetch(path);
     let result = await response.json();
     return result;
@@ -390,6 +388,11 @@ function ArrayMax(array) {
     }
   }
   return array[index];
+}
+
+function format_time(x){
+  let xx = a > 3
+  return a
 }
 
 export default new GameCore();

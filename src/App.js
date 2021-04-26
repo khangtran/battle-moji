@@ -21,6 +21,10 @@ export default class App extends React.Component {
             <span id="lb-mutil" />
           </div>
 
+          <div className="ui time">
+            <span id="lb-time">00:00</span>
+          </div>
+
           <div className="ui detect">
             <span id="lb-detect">Nhận dạng ...</span>
           </div>
