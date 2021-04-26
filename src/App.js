@@ -5,6 +5,8 @@ import GameCore from "./game";
 export default class App extends React.Component {
   componentDidMount() {
     GameCore.loaded();
+
+    console.log(">> git test");
   }
 
   render() {
