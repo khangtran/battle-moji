@@ -326,7 +326,7 @@ class GameCore {
     }, 1000);
 
     console.log(">> mutil kill", array.length);
-    console.log(">> mutil kill", swapn_list.length);
+    console.log(">> current list", swapn_list.length);
 
     for (var i = 0; i < array.length; i++) {
       let index = array[i].index;
