@@ -32,7 +32,7 @@ class GameCore {
     symbol_data = await this.loadFile(path_data01);
     console.log("data", touch_reconition);
 
-    this.drawTest();
+    // this.drawTest();
   }
 
   drawTest() {
