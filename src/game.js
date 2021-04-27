@@ -252,8 +252,6 @@ class GameCore {
   }
 
   detectSymbol(array) {
-    console.log("detect", array);
-
     let temp = ["x", "l", "t-p", "p-t", "c"];
     let result = [];
     for (var i = 0; i < array.length - 1; i++) {
@@ -271,7 +269,6 @@ class GameCore {
     }
 
     draw_path = [];
-    console.log("detect", result);
     return result;
   }
 
@@ -327,13 +324,15 @@ class GameCore {
     setTimeout(() => {
       HelperTextElement("lb-mutil", "");
     }, 1000);
+
     console.log(">> mutil kill", array.length);
+    console.log(">> mutil kill", swapn_list.length);
 
     for (var i = 0; i < array.length; i++) {
       let index = array[i].index;
       let item = swapn_list[index];
       item.destroy();
-      level_symbol.splice(index, 1);
+      swapn_list.splice(index, 1);
     }
   }
 
