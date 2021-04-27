@@ -165,10 +165,6 @@ class GameCore {
       let time = format_time(Time.time);
       HelperTextElement("lb-time", time);
     }, 33);
-
-    setInterval(() => {
-      console.log("list", swapn_list.length);
-    }, 1000);
   }
 
   startGame() {
@@ -222,6 +218,10 @@ class GameCore {
     let id;
 
     id = setInterval(() => {
+      if (count_sy < 0) {
+        clearInterval(id);
+      }
+
       let x = level_symbol[count_sy];
       let path_img = path_host.concat(x.img);
 
@@ -239,8 +239,8 @@ class GameCore {
         if (sy.position.y > h) {
           sy.destroy();
 
-          let x = level_symbol.findIndex(item => item === sy);
-          level_symbol.splice(x, 1);
+          let x = swapn_list.findIndex(item => item === sy);
+          swapn_list.splice(x, 1);
         }
       };
       count_sy -= 1;
@@ -324,12 +324,14 @@ class GameCore {
     HelperTextElement("lb-mutil", str_x);
     HelperTextElement("lb-detect", `${array[0].name} : ${x.percent}%`);
 
-    console.log(">> array", array);
+    setTimeout(() => {
+      HelperTextElement("lb-mutil", "");
+    }, 1000);
+    console.log(">> mutil kill", array.length);
 
     for (var i = 0; i < array.length; i++) {
       let index = array[i].index;
       let item = swapn_list[index];
-      console.log(">> item.destroy", item, index);
       item.destroy();
       level_symbol.splice(index, 1);
     }
