@@ -28,8 +28,11 @@ body,
 }
 
 .lobby {
-  top: 45%;
-  left: 35%;
+  bottom: 8px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  align-self: center;
+  width: fit-content;
 }
 
 .time {
@@ -37,7 +40,7 @@ body,
   left: 45%;
 }
 
-.bt-play {
+.bt {
   padding: 5px 25px;
   font-size: 18px;
 }

@@ -5,19 +5,19 @@ let w = window.innerWidth - 2,
   h = window.innerHeight - 2;
 
 let draw_path = [];
-var data_sy;
 
 let path_data = "/res/data.json";
+let path_data01 = "/res/data01.json";
+var touch_reconition, symbol_data;
 
 let Time = { deltaTime: 0, time: 0 };
 let gameStart = false;
-let main_thread_id;
+let main_thread_id, create_sy_id;
 let level_symbol = [],
   level = 1,
   count_sy;
 let swapn_list = [];
 let score = 0;
-let create_sy_id;
 
 import GameSymbol from "./symbol";
 
@@ -26,16 +26,32 @@ class GameCore {
     this.setup_ui();
     this.setup_canvas();
     // draw_backgroud()
-    data_sy = await this.loadFile(path_data);
-    console.log("data", data_sy);
+    touch_reconition = await this.loadFile(path_data);
+    symbol_data = await this.loadFile(path_data01);
+    console.log("data", touch_reconition);
 
-    console.log("load data");
+    this.drawTest();
+  }
+
+  drawTest() {
+    // let centerX = this.position.x + 15;
+    let img = new Image();
+    img.onload = () => {
+      ctx.beginPath();
+      ctx.drawImage(img, 10, 10, 30, 30);
+      ctx.closePath();
+
+      console.log(">> test");
+    };
+    img.onerror = e => {
+      console.log(">> img errror", e);
+    };
+    img.src = "/res/symbol_01.png";
   }
 
   setup_ui() {
     HelperButton("bt-play", () => {
       this.startGame();
-      this.main_thread();
     });
   }
 
@@ -139,17 +155,18 @@ class GameCore {
     let qt = 20;
 
     main_thread_id = setInterval(() => {
-      if (level_symbol.length === 0 || count_sy === 0) {
-        clearInterval(create_sy_id);
-        setTimeout(() => {
-          showLobby(false);
-        }, 1000);
+      if ((swapn_list.length === 0 && Time.time > 2) || count_sy === 0) {
+        this.endGame();
       }
       Time.time += 33 / 1000;
 
       let time = format_time(Time.time);
       HelperTextElement("lb-time", time);
     }, 33);
+
+    setInterval(() => {
+      console.log("list", swapn_list.length);
+    }, 1000);
   }
 
   startGame() {
@@ -159,15 +176,19 @@ class GameCore {
 
     showLobby(true);
     gameStart = true;
+    this.main_thread();
 
-    console.log("start_game", level_symbol, count_sy);
+    console.log("start_game", swapn_list, count_sy);
   }
 
   endGame() {
-    showLobby(true);
+    setTimeout(() => {
+      showLobby(true);
+    }, 1000);
     gameStart = false;
-
-    console.log("end_game", level_symbol, count_sy);
+    clearInterval(main_thread_id);
+    clearInterval(create_sy_id);
+    console.log("end_game");
   }
 
   resetGame() {
@@ -196,9 +217,9 @@ class GameCore {
   }
 
   spawnSymbol(spawn_time) {
-    let create_sy_id;
-
-    create_sy_id = setInterval(() => {
+    let id;
+    console.log("1.test");
+    id = setInterval(() => {
       let x = level_symbol[count_sy];
 
       let sy = new GameSymbol(
@@ -222,9 +243,10 @@ class GameCore {
       count_sy -= 1;
       swapn_list.push(sy);
       HelperTextElement("lb-level", `Level ${level}:${count_sy}`);
+      console.log("2.test");
     }, spawn_time);
 
-    return create_sy_id;
+    return id;
   }
 
   detectSymbol(array) {
@@ -254,7 +276,7 @@ class GameCore {
   recogintionToObject(array) {
     let list_match = [];
 
-    data_sy.forEach(item => {
+    touch_reconition.forEach(item => {
       let list_tmp = [];
       item.code.forEach(c => {
         let match = 0;
@@ -319,45 +341,6 @@ class GameCore {
   }
 }
 
-let symbol_data = [
-  {
-    name: "xuống",
-    speed: 8,
-    hp: 1,
-    score: 100,
-    img: "/res/symbol_01.png",
-    w: 30,
-    h: 30
-  },
-  {
-    name: "lên",
-    speed: 12,
-    hp: 1,
-    score: 200,
-    img: "/res/symbol_02.png",
-    w: 30,
-    h: 30
-  },
-  {
-    name: "trái",
-    speed: 10,
-    hp: 1,
-    score: 150,
-    img: "/res/symbol_03.png",
-    w: 30,
-    h: 30
-  },
-  {
-    name: "phải",
-    speed: 8,
-    hp: 1,
-    score: 100,
-    img: "/res/symbol_04.png",
-    w: 30,
-    h: 30
-  }
-];
-
 function HelperElement(id) {
   return document.getElementById(id);
 }
@@ -402,7 +385,7 @@ function format_time(ms) {
   let s = parseInt(ms % 60);
   let m = parseInt(total_minutes % 60);
 
-  return `${m > 10 ? m : `0${m}`}:${s > 10 ? s : `0${s}`}`;
+  return `${m > 9 ? m : `0${m}`}:${s > 9 ? s : `0${s}`}`;
 }
 
 export default new GameCore();

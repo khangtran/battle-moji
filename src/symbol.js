@@ -4,17 +4,15 @@ export default class GameSymbol {
     this.speed = speed;
     this.hp = hp;
     this.source = new Image();
-    this.source.onload = ev => {
-      // this.draw();
-    };
     this.source.src = img;
+    this.source.onLoad = () => {
+      this.draw();
+    };
     this.size = { width: w, height: h };
     this.position = { x: pos.x, y: pos.y };
     this.score = score;
     this.update_id = 0;
-    // this.update();
-
-    this.draw();
+    this.update();
   }
 
   draw() {
@@ -32,7 +30,6 @@ export default class GameSymbol {
       this.size.width,
       this.size.height
     );
-    // console.log('draw', this.position)
   }
 
   drawHealth(x) {
