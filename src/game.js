@@ -8,6 +8,8 @@ let draw_path = [];
 
 let path_data = "/res/data.json";
 let path_data01 = "/res/data01.json";
+let path_host =
+  "https://raw.githubusercontent.com/khangtran/battle-moji/master/public";
 var touch_reconition, symbol_data;
 
 let Time = { deltaTime: 0, time: 0 };
@@ -44,9 +46,9 @@ class GameCore {
       console.log(">> test");
     };
     img.onerror = e => {
-      console.log(">> img errror", e);
+      console.log(">> img error", e);
     };
-    img.src = "/res/symbol_01.png";
+    img.src = path_host.concat("/res/symbol_01.png");
   }
 
   setup_ui() {
@@ -218,9 +220,10 @@ class GameCore {
 
   spawnSymbol(spawn_time) {
     let id;
-    console.log("1.test");
+
     id = setInterval(() => {
       let x = level_symbol[count_sy];
+      let path_img = path_host.concat(x.img);
 
       let sy = new GameSymbol(
         x.name,
@@ -228,7 +231,7 @@ class GameCore {
         x.position,
         x.hp,
         x.score,
-        x.img,
+        path_img,
         x.w,
         x.h
       );
@@ -243,7 +246,6 @@ class GameCore {
       count_sy -= 1;
       swapn_list.push(sy);
       HelperTextElement("lb-level", `Level ${level}:${count_sy}`);
-      console.log("2.test");
     }, spawn_time);
 
     return id;
