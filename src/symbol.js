@@ -4,10 +4,10 @@ export default class GameSymbol {
     this.speed = speed;
     this.hp = hp;
     this.source = new Image();
-    this.source.onload = ev => {
+    this.source.src = img;
+    this.source.onLoad = () => {
       this.draw();
     };
-    this.source.src = img;
     this.size = { width: w, height: h };
     this.position = { x: pos.x, y: pos.y };
     this.score = score;
@@ -23,14 +23,13 @@ export default class GameSymbol {
     for (var i = 0; i < this.hp; i++) {
       this.drawHealth(centerX);
     }
-    ctx.drawImage(
+    window.ctx.drawImage(
       this.source,
       this.position.x,
       this.position.y,
       this.size.width,
       this.size.height
     );
-    // console.log('draw', this.position)
   }
 
   drawHealth(x) {
@@ -60,7 +59,7 @@ export default class GameSymbol {
   }
 
   clear() {
-    ctx.clearRect(
+    window.ctx.clearRect(
       this.position.x,
       this.position.y - 30,
       this.size.width,
