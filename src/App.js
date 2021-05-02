@@ -31,14 +31,14 @@ export default class App extends React.Component {
         </div>
 
         <div id="ui-lobby" className="ui lobby">
-          <button id="bt-skill" className="bt">
-            Kĩ năng
+          <button id="bt-friend" className="bt">
+            Bạn bè
           </button>
           <button id="bt-play" className="bt">
             Tìm trận
           </button>
-          <button id="bt-friend" className="bt">
-            Bạn bè
+          <button id="bt-skill" className="bt">
+            Cửa hàng
           </button>
         </div>
       </div>

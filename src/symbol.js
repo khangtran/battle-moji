@@ -5,14 +5,14 @@ export default class GameSymbol {
     this.hp = hp;
     this.source = new Image();
     this.source.src = img;
-    this.source.onLoad = () => {
-      this.draw();
+    this.source.onload = () => {
+      this.update();
     };
     this.size = { width: w, height: h };
     this.position = { x: pos.x, y: pos.y };
     this.score = score;
     this.update_id = 0;
-    this.update();
+    this.onUpdate = null
   }
 
   draw() {
@@ -45,7 +45,8 @@ export default class GameSymbol {
       this.clear();
       this.drop();
 
-      this.onUpdate && this.onUpdate();
+      this.onUpdate || this.onUpdate()
+   
     }, 33);
   }
 
@@ -54,8 +55,12 @@ export default class GameSymbol {
     this.draw();
   }
 
-  takeDame() {
-    this.hp -= 1;
+  takeDame(damge) {
+    if (this.hp === 0) {
+      this.destroy()
+    }
+
+    this.hp -= damge;
   }
 
   clear() {
@@ -71,5 +76,7 @@ export default class GameSymbol {
   destroy() {
     clearInterval(this.update_id);
     this.clear();
+
+    console.log('destroy', this.name)
   }
 }

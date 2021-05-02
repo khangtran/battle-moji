@@ -10,6 +10,7 @@ let path_data = "/res/data.json";
 let path_data01 = "/res/data01.json";
 let path_host =
   "https://raw.githubusercontent.com/khangtran/battle-moji/master/public";
+
 var touch_reconition, symbol_data;
 
 let Time = { deltaTime: 0, time: 0 };
@@ -27,12 +28,10 @@ class GameCore {
   async loaded() {
     this.setup_ui();
     this.setup_canvas();
-    // draw_backgroud()
     touch_reconition = await this.loadFile(path_data);
     symbol_data = await this.loadFile(path_data01);
     console.log("data", touch_reconition);
 
-    // this.drawTest();
   }
 
   drawTest() {
@@ -79,11 +78,8 @@ class GameCore {
 
       let sy = this.detectSymbol(draw_path);
       console.log(`result`, JSON.stringify(sy));
-      let result = this.recogintionToObject(sy);
-      HelperTextElement(
-        "lb-detect",
-        `${result.key}:${result.percent}:${sy.length}`
-      );
+      let result = this.recognitionToObject(sy);
+      HelperTextElement("lb-detect", `${result.key}:${result.percent}:${sy.length}`);
       result.percent > 80 && this.killSymbol(result);
 
       this.clearFrame(100);
@@ -154,10 +150,9 @@ class GameCore {
   }
 
   main_thread() {
-    let qt = 20;
 
     main_thread_id = setInterval(() => {
-      if ((swapn_list.length === 0 && Time.time > 2) || count_sy === 0) {
+      if (swapn_list.length === 0 && Time.time > 5) {
         this.endGame();
       }
       Time.time += 33 / 1000;
@@ -168,21 +163,24 @@ class GameCore {
   }
 
   startGame() {
-    level_symbol = this.createLevel(1, 10);
-    create_sy_id = this.spawnSymbol(1500);
+    gameStart = true;
+
+    level_symbol = this.createLevel(1, 3);
+    create_sy_id = this.spawnSymbol(2500);
     count_sy = level_symbol.length - 1;
 
-    showLobby(true);
-    gameStart = true;
+    showLobby(false);
     this.main_thread();
 
-    console.log("start_game", swapn_list, count_sy);
+
+    console.log("start_game", level_symbol.length, count_sy);
   }
 
   endGame() {
     setTimeout(() => {
       showLobby(true);
     }, 1000);
+
     gameStart = false;
     clearInterval(main_thread_id);
     clearInterval(create_sy_id);
@@ -200,9 +198,8 @@ class GameCore {
     let percent_hp_hight = 10 + level / 3;
 
     for (var i = 0; i < maxQt; i++) {
-      let rand_pos = MathRandom(10, 550);
+      let rand_pos = MathRandom(10, w - 30);
       let rand = MathRandom(0, 3);
-      console.log(">> rand", rand);
       let data = symbol_data[rand];
       data.speed += 0.25 * level;
 
@@ -218,7 +215,7 @@ class GameCore {
     let id;
 
     id = setInterval(() => {
-      if (count_sy < 0) {
+      if (count_sy === 0) {
         clearInterval(id);
       }
 
@@ -235,7 +232,10 @@ class GameCore {
         x.w,
         x.h
       );
+
       sy.onUpdate = () => {
+        console.log(sy.name, 'destroy:', sy.position.y > h)
+
         if (sy.position.y > h) {
           sy.destroy();
 
@@ -243,9 +243,10 @@ class GameCore {
           swapn_list.splice(x, 1);
         }
       };
+
       count_sy -= 1;
       swapn_list.push(sy);
-      HelperTextElement("lb-level", `Level ${level}:${count_sy}`);
+      HelperTextElement("lb-level", `Level ${level}:${count_sy + 1}`);
     }, spawn_time);
 
     return id;
@@ -272,7 +273,7 @@ class GameCore {
     return result;
   }
 
-  recogintionToObject(array) {
+  recognitionToObject(array) {
     let list_match = [];
 
     touch_reconition.forEach(item => {
@@ -308,6 +309,7 @@ class GameCore {
   }
 
   killSymbol(x) {
+
     let remap = swapn_list.map((item, index) => {
       return { ...item, index: index };
     });
@@ -353,6 +355,17 @@ function HelperTextElement(id, text) {
   ele.textContent = text;
 }
 
+function HelperFloatText(id, from, to, duration) {
+  let floatID;
+  let lb = HelperElement(id)
+  let delta = from
+  floatID = setInterval(() => {
+    if (delta > to) clearInterval(floatID)
+    delta += from
+    lb.textContent = delta
+  }, from / duration)
+}
+
 function HelperButton(id, press) {
   let el = document.getElementById(id);
   el.onclick = () => {
@@ -362,7 +375,7 @@ function HelperButton(id, press) {
 
 function showLobby(isShow) {
   let ui = document.getElementById("ui-lobby");
-  ui.hidden = isShow;
+  ui.hidden = !isShow;
 }
 
 function MathRandom(min, max) {
