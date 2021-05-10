@@ -1,46 +1,29 @@
 import React from "react";
 import "./style.css";
-import GameCore from "./game";
+import LobbyPage from "./page/lobby";
+import GamePage from "./page/game";
+import ResultPage from "./page/result";
 
 export default class App extends React.Component {
+
   componentDidMount() {
-    GameCore.loaded();
+    this.ui_lobby.findMatchDelegate = () => {
+      this.ui_game.show(true)
+    }
+
+    this.ui_game.onEndGame = () => {
+      this.ui_game.show(false)
+      this.ui_result.show(true)
+    }
   }
 
   render() {
     return (
       <div id="main">
-        <div id="ui-game">
-          <canvas id="canvas" />
 
-          <div className="ui score">
-            <span id="lb-level">Level 1: 10</span>
-            <br />
-            <span id="lb-score">Điểm 0</span>
-            <br />
-            <span id="lb-mutil" />
-          </div>
-
-          <div className="ui time">
-            <span id="lb-time">00:00</span>
-          </div>
-
-          <div className="ui detect">
-            <span id="lb-detect">Nhận dạng ...</span>
-          </div>
-        </div>
-
-        <div id="ui-lobby" className="ui lobby">
-          <button id="bt-friend" className="bt">
-            Bạn bè
-          </button>
-          <button id="bt-play" className="bt">
-            Tìm trận
-          </button>
-          <button id="bt-skill" className="bt">
-            Cửa hàng
-          </button>
-        </div>
+        <GamePage ref={c => this.ui_game = c} />
+        <LobbyPage ref={c => this.ui_lobby = c} />
+        <ResultPage ref={c => this.ui_result = c} />
       </div>
     );
   }

@@ -22,32 +22,17 @@ let level_symbol = [],
 let swapn_list = [];
 let score = 0;
 
+import { GSprite } from "./GameScript";
 import GameSymbol from "./symbol";
 
 class GameCore {
   async loaded() {
-    this.setup_ui();
+    // this.setup_ui();
     this.setup_canvas();
     touch_reconition = await this.loadFile(path_data);
     symbol_data = await this.loadFile(path_data01);
+
     console.log("data", touch_reconition);
-
-  }
-
-  drawTest() {
-    // let centerX = this.position.x + 15;
-    let img = new Image();
-    img.onload = () => {
-      ctx.beginPath();
-      ctx.drawImage(img, 10, 10, 30, 30);
-      ctx.closePath();
-
-      console.log(">> test");
-    };
-    img.onerror = e => {
-      console.log(">> img error", e);
-    };
-    img.src = path_host.concat("/res/symbol_01.png");
   }
 
   setup_ui() {
@@ -169,21 +154,18 @@ class GameCore {
     create_sy_id = this.spawnSymbol(2500);
     count_sy = level_symbol.length - 1;
 
-    showLobby(false);
     this.main_thread();
-
 
     console.log("start_game", level_symbol.length, count_sy);
   }
 
   endGame() {
-    setTimeout(() => {
-      showLobby(true);
-    }, 1000);
 
     gameStart = false;
     clearInterval(main_thread_id);
     clearInterval(create_sy_id);
+
+    this.onEndGameDelegate && this.onEndGameDelegate()
     console.log("end_game");
   }
 
@@ -219,30 +201,27 @@ class GameCore {
         clearInterval(id);
       }
 
-      let x = level_symbol[count_sy];
-      let path_img = path_host.concat(x.img);
+      let sy_data = level_symbol[count_sy];
+      let path_img = path_host.concat(sy_data.img);
 
-      let sy = new GameSymbol(
-        x.name,
-        x.speed,
-        x.position,
-        x.hp,
-        x.score,
-        path_img,
-        x.w,
-        x.h
-      );
+
+      let sy = new GameSymbol(sy_data.name,
+        sy_data.speed,
+        sy_data.position,
+        sy_data.hp,
+        sy_data.score,
+        sy_data.img,
+        30, 30)
 
       sy.onUpdate = () => {
-        console.log(sy.name, 'destroy:', sy.position.y > h)
 
         if (sy.position.y > h) {
-          sy.destroy();
+          sy.sprite.destroy()
 
           let x = swapn_list.findIndex(item => item === sy);
           swapn_list.splice(x, 1);
         }
-      };
+      }
 
       count_sy -= 1;
       swapn_list.push(sy);
@@ -293,7 +272,7 @@ class GameCore {
 
         let percent = (match * 100) / max;
         percent = Number(percent.toFixed(2));
-        console.log(item.key, c.length, array.length, max, match, percent);
+        // console.log(item.key, c.length, array.length, max, match, percent);
 
         list_tmp.push(percent);
         list_tmp.sort();
@@ -333,7 +312,7 @@ class GameCore {
     for (var i = 0; i < array.length; i++) {
       let index = array[i].index;
       let item = swapn_list[index];
-      item.destroy();
+      item.takeDame(1);
       swapn_list.splice(index, 1);
     }
   }
@@ -404,4 +383,5 @@ function format_time(ms) {
   return `${m > 9 ? m : `0${m}`}:${s > 9 ? s : `0${s}`}`;
 }
 
-export default new GameCore();
+var GameCoreInstance = new GameCore()
+export default GameCoreInstance
