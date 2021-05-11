@@ -11,7 +11,19 @@ export default class GamePage extends React.Component {
 
     componentDidMount() {
         GameCoreInstance.loaded();
-        GameCoreInstance.onEndGameDelegate = this.props.onEndGame
+    }
+
+
+    get gamedata() {
+        return GameCoreInstance.gamedata
+    }
+
+    setEvent(event, callback) {
+
+        switch (event) {
+            case 'endgame':
+                GameCoreInstance.onEndGameDelegate = callback
+        }
     }
 
     render() {

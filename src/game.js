@@ -16,16 +16,24 @@ var touch_reconition, symbol_data;
 let Time = { deltaTime: 0, time: 0 };
 let gameStart = false;
 let main_thread_id, create_sy_id;
-let level_symbol = [],
+let wave_data = [],
   level = 1,
   count_sy;
 let swapn_list = [];
-let score = 0;
 
 import { GSprite } from "./GameScript";
 import GameSymbol from "./symbol";
 
 class GameCore {
+
+  gamedata = {
+    bonus: 0,
+    combo: 0,
+    accurate: 0,
+    miss: 0,
+    exp: 0
+  }
+
   async loaded() {
     // this.setup_ui();
     this.setup_canvas();
@@ -148,15 +156,17 @@ class GameCore {
   }
 
   startGame() {
+    this.resetGame()
+
     gameStart = true;
 
-    level_symbol = this.createLevel(1, 3);
+    wave_data = this.createLevel(1, 3);
     create_sy_id = this.spawnSymbol(2500);
-    count_sy = level_symbol.length - 1;
+    count_sy = wave_data.length - 1;
 
     this.main_thread();
 
-    console.log("start_game", level_symbol.length, count_sy);
+    console.log("start_game", count_sy);
   }
 
   endGame() {
@@ -164,6 +174,12 @@ class GameCore {
     gameStart = false;
     clearInterval(main_thread_id);
     clearInterval(create_sy_id);
+    let accurate = wave_data.length - this.gamedata.miss
+    let percent = (accurate / wave_data.length) * 100
+    this.gamedata.accurate = percent.toFixed(2)
+
+    this.gamedata.exp = this.gamedata.combo * 2 + this.gamedata.bonus * 0.25 + this.gamedata.accurate * 3
+    this.gamedata.bonus = this.gamedata.bonus * 0.15
 
     this.onEndGameDelegate && this.onEndGameDelegate()
     console.log("end_game");
@@ -171,6 +187,14 @@ class GameCore {
 
   resetGame() {
     count_sy = 0;
+
+    this.gamedata = {
+      accurate: 0,
+      combo: 0,
+      bonus: 0,
+      miss: 0,
+    }
+
     clearInterval(create_sy_id);
     this.clearFrame(0);
   }
@@ -201,9 +225,8 @@ class GameCore {
         clearInterval(id);
       }
 
-      let sy_data = level_symbol[count_sy];
+      let sy_data = wave_data[count_sy];
       let path_img = path_host.concat(sy_data.img);
-
 
       let sy = new GameSymbol(sy_data.name,
         sy_data.speed,
@@ -217,7 +240,7 @@ class GameCore {
 
         if (sy.position.y > h) {
           sy.sprite.destroy()
-
+          this.gamedata.miss += 1
           let x = swapn_list.findIndex(item => item === sy);
           swapn_list.splice(x, 1);
         }
@@ -287,30 +310,34 @@ class GameCore {
     return list_match[0];
   }
 
+  lastMuti = 0
   killSymbol(x) {
 
     let remap = swapn_list.map((item, index) => {
       return { ...item, index: index };
     });
-    let array = remap.filter(item => item.name === x.key);
-    if (array.length === 0) return;
-    score += array[0].score * array.length;
+    let ar_mutilkill = remap.filter(item => item.name === x.key);
+    if (ar_mutilkill.length === 0) return;
 
-    let str_x = array.length === 1 ? "" : `x${array.length}`;
+    this.gamedata.bonus += ar_mutilkill[0].score * ar_mutilkill.length;
+    let str_x = ar_mutilkill.length === 1 ? "" : `x${ar_mutilkill.length}`;
 
-    HelperTextElement("lb-score", `Điểm    ${score}`);
-    HelperTextElement("lb-mutil", str_x);
-    HelperTextElement("lb-detect", `${array[0].name} : ${x.percent}%`);
+    HelperTextElement("lb-mutil", str_x)
+    HelperTextElement("lb-score", `Điểm    ${this.gamedata.bonus}`);
+    HelperTextElement("lb-detect", `${ar_mutilkill[0].name} : ${x.percent}%`);
+
+    if (this.lastMuti < ar_mutilkill.length)
+      this.lastMuti = ar_mutilkill.length
 
     setTimeout(() => {
       HelperTextElement("lb-mutil", "");
     }, 1000);
 
-    console.log(">> mutil kill", array.length);
+    console.log(">> mutil kill", ar_mutilkill.length);
     console.log(">> current list", swapn_list.length);
 
-    for (var i = 0; i < array.length; i++) {
-      let index = array[i].index;
+    for (var i = 0; i < ar_mutilkill.length; i++) {
+      let index = ar_mutilkill[i].index;
       let item = swapn_list[index];
       item.takeDame(1);
       swapn_list.splice(index, 1);

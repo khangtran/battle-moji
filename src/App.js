@@ -7,14 +7,22 @@ import ResultPage from "./page/result";
 export default class App extends React.Component {
 
   componentDidMount() {
-    this.ui_lobby.findMatchDelegate = () => {
+    this.ui_lobby.onNotifyMatched = () => {
       this.ui_game.show(true)
     }
 
-    this.ui_game.onEndGame = () => {
+    this.ui_game.setEvent('endgame', () => {
+
       this.ui_game.show(false)
-      this.ui_result.show(true)
-    }
+      this.ui_result.show(true, this.ui_game.gamedata)
+    })
+
+    console.log('setup', this.ui_game)
+  }
+
+  backToLobby() {
+    this.ui_result.show(false)
+    this.ui_lobby.show(true)
   }
 
   render() {
@@ -23,7 +31,9 @@ export default class App extends React.Component {
 
         <GamePage ref={c => this.ui_game = c} />
         <LobbyPage ref={c => this.ui_lobby = c} />
-        <ResultPage ref={c => this.ui_result = c} />
+        <ResultPage ref={c => this.ui_result = c}
+          onBackPress={() => this.backToLobby()}
+        />
       </div>
     );
   }

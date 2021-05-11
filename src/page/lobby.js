@@ -6,8 +6,41 @@ import { List, ListWrap } from "../Component"
 const list_skill = [{ name: 'Hàn băng', des: 'Đóng băng đối phương', type: 'time', affect: 3, isActive: true, require: 2, img: 'skill_6.png' },
 { name: 'Tê liệt', des: 'Gây choáng đối phương', type: 'time', affect: 2, isActive: true, require: 2, img: 'skill_2.png' },
 { name: 'Sock ', des: 'Gây mù đối phương', type: 'time', affect: 2, isActive: true, require: 2, img: 'skill_4.png' },
-
 ]
+
+
+class UIFindMatch extends React.Component {
+
+    state = {
+        isShow: false
+    }
+
+    show(bool) {
+        this.setState({
+            isShow: bool
+        })
+        return this
+    }
+
+    onMatched(cb) {
+        setTimeout(() => {
+            this.show(false)
+            cb()
+        }, 2000)
+    }
+
+    render() {
+        return <div className='ui' style={{ width: '100%', height: '100%', backgroundColor: 'rgb(128, 128, 128, 0.5)', display: this.state.isShow ? 'flex' : 'none' }}>
+            <div style={{ alignSelf: 'center', marginTop: '50%', backgroundColor: 'white', width: '100%' }} >
+                <div style={{ margin: 8, alignItems: 'center' }}>
+                    <span style={{ fontSize: 18 }}>Thời gian</span>
+                    <span style={{ fontSize: 30, margin: '8px 0px' }} >00:00</span>
+                    <button style={{ fontSize: 15, width: 100 }}>Hủy</button>
+                </div>
+            </div>
+        </div>
+    }
+}
 
 export default class LobbyPage extends React.Component {
 
@@ -22,13 +55,18 @@ export default class LobbyPage extends React.Component {
 
     }
 
-
     onBtFindMatch() {
-        GameCoreInstance.startGame()
-        this.show(false)
 
-        this.findMatchDelegate && this.findMatchDelegate()
-        console.log('delegate', this.findMatchDelegate)
+        this.findMatch.show(true)
+            .onMatched(() => {
+
+                GameCoreInstance.startGame()
+                this.show(false)
+
+                this.onNotifyMatched && this.onNotifyMatched()
+            })
+
+        console.log('setup button findmatch lobby')
     }
 
     show(bool) {
@@ -52,20 +90,24 @@ export default class LobbyPage extends React.Component {
                 </div>
 
                 <div style={{ flex: 0.95, margin: 8, }} >
-                    <span>Kĩ năng</span>
-                    <ListWrap data={list_skill} />
+                    <span>Trang bị</span>
+                    <ListWrap data={list_skill} render={(item, index) => <div key={index} style={{ width: 100, height: 125, margin: '8px 10px 10px 0' }}>
+                        <img alt='hình' src={`/res/gfx/${item.img}`} style={{ width: 100, height: 100, border: 0 }} />
+                        <div style={{ marginLeft: 1 }}>
+                            <span style={{ fontSize: 15, fontWeight: 600, marginTop: 5 }} >{item.name}</span>
+                        </div>
+                    </div>} />
 
-                    <List data={list_skill} render={(item, index) => <div key={index} style={{ marginBottom: 10 }}>
+                    <span>Kĩ năng</span>
+                    <List data={list_skill} render={(item, index) => <div key={index} style={{ marginTop: 8 }}>
                         <div style={{ flexDirection: "row" }}>
                             <img src={`/res/gfx/${item.img}`} style={{ width: 100, height: 100 }} />
                             <div style={{ marginLeft: 5 }}>
-                                <span style={{ fontSize: 15, fontWeight: 600 }} >{item.name}</span>
-                                <span style={{ fontSize: 13 }} >{`Yêu cầu Level ${item.require}. `}</span>
-                                <span style={{ fontSize: 13 }}>  {`${item.des} ${item.affect}s`}</span>
+                                <span style={{ fontSize: 15, fontWeight: 600 }}>{item.name}</span>
+                                <span style={{ fontSize: 13 }}> {`Yêu cầu Level ${item.require}. `}</span>
+                                <span style={{ fontSize: 13 }}> {`${item.des} ${item.affect}s`}</span>
                             </div>
-
                         </div>
-
                     </div>} />
                 </div>
 
@@ -80,6 +122,9 @@ export default class LobbyPage extends React.Component {
                         Cửa hàng
                     </button>
                 </div>
+
+                <UIFindMatch ref={c => this.findMatch = c} />
+
             </div>
         )
     }
