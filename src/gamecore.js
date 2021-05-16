@@ -34,6 +34,10 @@ class GameCore {
     exp: 0
   }
 
+  loadFromServer(symbols) {
+
+  }
+
   async loaded() {
     // this.setup_ui();
     this.setup_canvas();

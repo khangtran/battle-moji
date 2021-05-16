@@ -13,6 +13,14 @@ div{
 
 }
 
+input {
+  height: 42px;
+  font-size: 15px;
+  margin: 1px 0;
+  box-sizing: border-box;
+  padding: 2px 5px;
+}
+
 .row{
   flex-direction: row;
   justify-content: space-between;
@@ -52,8 +60,23 @@ div{
 }
 
 .bt {
-  padding: 5px 20px;
+  padding: 10px 20px;
   font-size: 16px;
+  margin: 1px 0;
+
+  cursor: pointer;
+}
+
+.border{
+border: 1px solid lightgrey;
+}
+
+.no-border{
+  border: none;
+}
+
+.cursor{
+  cursor: pointer;
 }
 
 #lb-mutil {
@@ -66,4 +89,22 @@ div{
   flex-wrap: wrap;
   flex-direction: row;
   overflow: auto;
+}
+
+.bg-blur{
+  background-color: rgba(32, 32, 32, 0.7);
+}
+
+.login {
+  background-color: rgb(64, 140, 255);
+}
+
+.signup{
+  border: none;
+  background-color: transparent;
+  color: black;
+}
+
+.signup:hover{
+  color: rgb(64, 140, 255);
 }

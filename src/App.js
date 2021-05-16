@@ -3,37 +3,69 @@ import "./style.css";
 import LobbyPage from "./page/lobby";
 import GamePage from "./page/game";
 import ResultPage from "./page/result";
+import LoadingPage from "./page/loading";
+import LoginPage from "./page/login";
+import PageManager from "./PageManager";
+import Network from "./network";
 
 export default class App extends React.Component {
 
   componentDidMount() {
-    this.ui_lobby.onNotifyMatched = () => {
-      this.ui_game.show(true)
-    }
 
-    this.ui_game.setEvent('endgame', () => {
+    PageManager.instance.addPage('login', this.login_page, true)
+    PageManager.instance.addPage('lobby', this.lobby_page)
+    PageManager.instance.addPage('loading', this.loading_page)
+    PageManager.instance.addPage('game', this.game_page)
+    PageManager.instance.addPage('result', this.result_page)
 
-      this.ui_game.show(false)
-      this.ui_result.show(true, this.ui_game.gamedata)
+    PageManager.instance.addTransition('login', 'lobby')
+    PageManager.instance.addTransition('lobby', 'loading')
+    PageManager.instance.addTransition('loading', 'game')
+    PageManager.instance.addTransition('game', 'result')
+    PageManager.instance.addTransition('result', 'lobby')
+
+    Network.instance.setupEvent(event => {
+      switch (event.name) {
+        case 'connected':
+
+          setTimeout(() => {
+            PageManager.instance.setTransition('lobby')
+            console.log('[networkd] connected')
+          }, 500)
+          break
+
+        case 'onMatched':
+          this.lobby_page.waitingMatch.toggle()
+          PageManager.instance.setTransition('loading')
+            .setData(event.data.players)
+          console.log('onMatched', event.data)
+          break
+
+        case 'onGameLoad':
+          // PageManager.instance.setTransition('game')
+          break
+      }
     })
 
-    console.log('setup', this.ui_game)
+    console.log('PageManagerList', PageManager.instance.list)
   }
 
   backToLobby() {
-    this.ui_result.show(false)
-    this.ui_lobby.show(true)
+    PageManager.instance.setTransition('lobby')
   }
 
   render() {
     return (
       <div id="main">
 
-        <GamePage ref={c => this.ui_game = c} />
-        <LobbyPage ref={c => this.ui_lobby = c} />
-        <ResultPage ref={c => this.ui_result = c}
+        <LoginPage ref={c => this.login_page = c} />
+        <LobbyPage ref={c => this.lobby_page = c} />
+        <GamePage ref={c => this.game_page = c} />
+        <ResultPage ref={c => this.result_page = c}
           onBackPress={() => this.backToLobby()}
         />
+
+        <LoadingPage ref={c => this.loading_page = c} />
       </div>
     );
   }
