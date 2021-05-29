@@ -19,10 +19,12 @@ export default class PageManager {
     }
 
     addPage(name, ref, isDefault) {
-        if (isDefault)
-            ref.toggle()
-            
+
         this.list.push({ name: name, ref: ref, default: isDefault || false })
+        if (isDefault) {
+            ref.toggle()
+            this._current = this.list.length - 1
+        }
     }
 
     get current() {

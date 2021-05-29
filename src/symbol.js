@@ -1,23 +1,30 @@
-import { GSprite } from "./GameScript";
+import { GameSprite, Time } from "./GameScript";
 
 export default class GameSymbol {
   constructor(name, speed, pos, hp, score, img, w, h) {
-    this.sprite = new GSprite(img, pos, { width: w, height: h })
+    this.sprite = new GameSprite(img, pos, { width: w, height: h })
     this.name = name;
     this.speed = speed;
     this.hp = hp;
     this.score = score;
-
-    this.sprite.onUpdate = () => {
-      this.movement()
-      this.draw()
-
-
-      this.onUpdate && this.onUpdate()
-    }
   }
 
   get position() { return this.sprite.position }
+
+  update() {
+    if (this.hp <= 0)
+      return
+
+    this.movement()
+    this.sprite.update()
+    this.draw()
+
+    this.sprite.onUpdate = () => {
+
+      // console.log('update')
+      this.onUpdate && this.onUpdate()
+    }
+  }
 
   draw() {
     let centerX = this.sprite.position.x + this.sprite.size.width / 2;
@@ -38,7 +45,7 @@ export default class GameSymbol {
   }
 
   movement() {
-    this.sprite.position.y += this.speed * 0.2;
+    this.sprite.position.y += this.speed * Time.deltaTime;
   }
 
   takeDame(damge) {
@@ -49,6 +56,4 @@ export default class GameSymbol {
       this.sprite.destroy()
     }
   }
-
-  
 }

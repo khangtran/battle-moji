@@ -7,15 +7,16 @@ import LoadingPage from "./page/loading";
 import LoginPage from "./page/login";
 import PageManager from "./PageManager";
 import Network from "./network";
+import GameCoreInstance from "./gamecore";
 
 export default class App extends React.Component {
 
   componentDidMount() {
 
-    PageManager.instance.addPage('login', this.login_page, true)
+    PageManager.instance.addPage('login', this.login_page, false)
     PageManager.instance.addPage('lobby', this.lobby_page)
     PageManager.instance.addPage('loading', this.loading_page)
-    PageManager.instance.addPage('game', this.game_page)
+    PageManager.instance.addPage('game', this.game_page, true)
     PageManager.instance.addPage('result', this.result_page)
 
     PageManager.instance.addTransition('login', 'lobby')
@@ -24,25 +25,37 @@ export default class App extends React.Component {
     PageManager.instance.addTransition('game', 'result')
     PageManager.instance.addTransition('result', 'lobby')
 
-    Network.instance.setupEvent(event => {
+    Network.instance.setupEvent(async event => {
+      console.log(`[network] ${event.name} `, event.data)
+
       switch (event.name) {
         case 'connected':
 
           setTimeout(() => {
             PageManager.instance.setTransition('lobby')
-            console.log('[networkd] connected')
-          }, 500)
+            console.log('[network] connected')
+          }, 250)
           break
 
         case 'onMatched':
           this.lobby_page.waitingMatch.toggle()
           PageManager.instance.setTransition('loading')
             .setData(event.data.players)
-          console.log('onMatched', event.data)
+          GameCoreInstance.setMatchInfo(event.data)
           break
 
         case 'onGameLoad':
-          // PageManager.instance.setTransition('game')
+          let gameData = JSON.parse(event.data)
+          await this.game_page.prepareBoard(gameData)
+          // Network.instance.ready(GameCoreInstance.matchInfo.id)
+          break
+
+        case 'onGameStart':
+          PageManager.instance.setTransition('game')
+          break
+
+        case 'onGameSync':
+          GameCoreInstance.sync(event.data)
           break
       }
     })

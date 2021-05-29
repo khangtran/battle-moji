@@ -1,5 +1,6 @@
 import React from "react";
-import { UIPopup, UIPage } from "../Component";
+import SocialLogin from "react-social-login";
+import SocialButton, { UIPopup, UIPage } from "../Component";
 import Network from "../network";
 import NetworkInstance from "../network";
 import PageManager from "../PageManager";
@@ -10,6 +11,9 @@ export default class LoginPage extends React.Component {
     componentDidMount() {
 
         setTimeout(() => {
+            if (!this.page.state.isShow)
+                return
+
             this.pop_loading.toggle()
 
             setTimeout(() => {
@@ -19,7 +23,7 @@ export default class LoginPage extends React.Component {
                     PageManager.instance.setTransition('lobby')
             }, 1500)
 
-        }, 500)
+        }, 1000)
     }
 
     async onPressLogin() {
@@ -32,33 +36,77 @@ export default class LoginPage extends React.Component {
         // localStorage.setItem('@profile', JSON.stringify(Profile.instance))
         // PageManager.instance.setTransition('lobby')
         Network.instance.connect()
+
+        // let playFullscreen = confirm('Bạn muốn chơi toàn màn hình ?')
+        // if (playFullscreen) {
+        //     let root = document.getElementById('root')
+        //     root.requestFullscreen()
+        // }
     }
 
     toggle() {
         this.page.toggle()
     }
 
+    onLoginFBSuccess(user) {
+        console.log('fb_login', user)
+        let { profilePicURL, id, name, } = user._profile
+        Profile.instance.avatar = profilePicURL
+        Profile.instance.fbid = id
+        Profile.instance.name = name
+        Profile.instance.token = user._token
+
+        PageManager.instance.setTransition('lobby')
+    }
+
+    onLoginFBFailure(error) {
+        console.log('fb_error', error)
+    }
+
     render() {
         return <UIPage ref={c => this.page = c} >
-            <div style={{ height: '100%', }} >
+            <div style={{ height: '100%', justifyContent: 'space-evenly' }} >
 
-                <div style={{ width: '100%' }}>
-                    <div style={{
-                        alignSelf: 'center', fontSize: 50,
-                        width: '55%', margin: '40% 0'
-                    }} >
-                        <span>Battle</span>
-                        <span style={{ textAlign: 'right' }} >Moji</span>
+                <div style={{
+                    alignSelf: 'center', fontSize: 50,
+                    width: '55%',
+                }} >
+                    <span>Battle</span>
+                    <span style={{ textAlign: 'right' }} >Moji</span>
+                </div>
+
+                <div style={{ alignSelf: 'center', width: '65%', marginBottom: '10%' }} >
+
+                    <span style={{ fontSize: 18 }} >Đăng nhập vào <span style={{ color: '#00a8b1' }} >Battle Moji </span> qua</span>
+
+                    <div style={{ justifyContent: 'space-between', height: 200, marginTop: 20 }} >
+                        <div className='row' style={{ justifyContent: 'center' }} >
+                            <input ref={c => this.field_name = c} placeholder='Tên người chơi' type='text' autoCapitalize='none' />
+                            {/* <input ref={c => this.field_pass = c} placeholder='Mật khẩu' type='password' /> */}
+
+                            <div>
+                                <button className='bt no-border bt-customer-login' onClick={() => this.onPressLogin()} >Khách</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span style={{ textAlign: 'center' }}>Hoặc</span>
+                        </div>
+
+                        <div style={{}} >
+                            <SocialButton className='bt no-border bt-fb-login'
+                                provider='facebook'
+                                appId='127781681311362'
+                                onLoginSuccess={user => this.onLoginFBSuccess(user)}
+                                onLoginFailure={err => this.onLoginFBFailure(err)} >
+                                Facebook
+                            </SocialButton>
+                        </div>
                     </div>
 
-                    <div style={{ alignSelf: 'center', width: '65%' }} >
-                        <input ref={c => this.field_name = c} placeholder='Tên đăng nhập' />
-                        <input ref={c => this.field_pass = c} placeholder='Mật khẩu' type='password' />
 
-                        <div style={{ marginTop: 20 }} >
-                            <button className='bt no-border login' style={{ color: 'white' }} onClick={() => this.onPressLogin()} >Đăng nhập</button>
-                            <button className='bt signup' style={{}} >Đăng kí</button>
-                        </div>
+                    <div className='ui' style={{ bottom: 8, right: 8 }}>
+                        <span style={{ color: 'gray', fontSize: 12 }}>APLA TEST v0.1 build 17052021</span>
                     </div>
                 </div>
 

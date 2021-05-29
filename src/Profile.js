@@ -33,10 +33,11 @@ export default class Profile {
     constructor(name, kcoin, kgold, fbid) {
         this.name = name
         this.level = new UserLevel()
-        this.kcoin = kcoin
-        this.kgold = kgold
+        this.kcoin = kcoin || 0
+        this.kgold = kgold || 0
         this.fbid = fbid
         this.avatar = '/res/profile_me.jpg'
+        this.token = '1234'
     }
 
     /**
@@ -46,7 +47,7 @@ export default class Profile {
     static get instance() {
         if (!instance) {
             console.warn('Profile dont loaded')
-            return null
+            return instance = new Profile()
         }
         return instance
     }
@@ -73,7 +74,7 @@ export default class Profile {
             instance = JSON.parse(localData)
         else
             return false
-            
+
         return true
     }
 

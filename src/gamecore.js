@@ -13,19 +13,20 @@ let path_host =
 
 var touch_reconition, symbol_data;
 
-let Time = { deltaTime: 0, time: 0 };
 let gameStart = false;
-let main_thread_id, create_sy_id;
-let wave_data = [],
+let main_thread_id, spawn_wave_id;
+let patterns = [],
   level = 1,
-  count_sy;
+  count_sy,
+  count_wave
 let swapn_list = [];
 
-import { GSprite } from "./GameScript";
+import { Time } from "./GameScript";
+import Network from "./network";
 import GameSymbol from "./symbol";
 
 class GameCore {
-
+  isPause = false;
   gamedata = {
     bonus: 0,
     combo: 0,
@@ -34,23 +35,130 @@ class GameCore {
     exp: 0
   }
 
-  loadFromServer(symbols) {
+  async prepare(data) {
 
-  }
-
-  async loaded() {
-    // this.setup_ui();
-    this.setup_canvas();
     touch_reconition = await this.loadFile(path_data);
     symbol_data = await this.loadFile(path_data01);
 
-    console.log("data", touch_reconition);
+    let { symbols, duration_reborn_symbol, velocity } = data
+    patterns = this.createPattern(symbols)
+
+    this.setupWave()
+
+    console.log("touch reconition v0.1", touch_reconition);
   }
 
-  setup_ui() {
-    HelperButton("bt-play", () => {
-      this.startGame();
-    });
+  /**
+   * 
+   * @param {Array} data 
+   * @returns {Array}
+   */
+  createPattern(data) {
+    let patterns = []
+    for (var i = 0; i < data.length; i++) {
+      let waves = []
+
+      let wave = data[i]
+      for (var j = 0; j < wave.length; j++) {
+        let code = wave[j]
+        let symbol = this.createSymbol(1, code)
+        waves.push(symbol)
+      }
+      patterns.push(waves)
+      this.game_Progress += wave.length
+
+    }
+    this.current_progress = this.game_Progress
+    this.updateProgress(this.game_Progress)
+    console.log('patterns', patterns, this.game_Progress)
+    return patterns
+  }
+
+  lastSpawn = 0
+  reborn_symbol_time = 2
+  delay_next_wave = 10
+  index_wave = 0
+  index_symbol = 0
+
+  current_wave = 0
+  wave_size = 0
+  count_symbol_wave = 0
+
+  setupWave() {
+    this.index_symbol = 0
+
+    this.current_wave = patterns[this.index_wave]
+    this.wave_size = this.current_wave.length
+    this.count_symbol_wave = this.wave_size
+  }
+
+  last_next = 0
+  delay_end_game = 0
+  isLoadWave = false
+
+  current_progress = 0
+  game_Progress = 0
+
+  spawn_symbol() {
+
+    // end game
+    if (this.index_wave >= patterns.length - 1) {
+      if (swapn_list.length === 0 && gameStart) {
+        this.endGame()
+        return
+      }
+    }
+
+    // delay + nextwave
+    if (Time.time - this.last_next > this.delay_next_wave && this.isLoadWave) {
+      this.index_wave += 1
+      this.setupWave()
+      this.last_next = Time.time
+      this.isLoadWave = false
+      console.log('next wave', this.index_wave)
+      return
+    }
+
+    if (this.index_symbol > this.wave_size - 1) {
+      if (this.index_wave < patterns.length - 1 && !this.isLoadWave) {
+        this.isLoadWave = true
+      }
+    }
+
+    if (this.index_symbol >= this.wave_size) return
+
+    if (Time.time - this.lastSpawn > this.reborn_symbol_time && !this.isLoadWave) {
+      let posx = MathRandom(10, w - 30)
+      let pos = { x: posx, y: 0 }
+
+      let sy_data = this.current_wave[this.index_symbol]
+      let sy = new GameSymbol(sy_data.name,
+        sy_data.speed,
+        pos,
+        sy_data.hp,
+        sy_data.score,
+        sy_data.img,
+        30, 30)
+
+      sy.onUpdate = () => {
+
+        if (sy.position.y > h + 50) {
+          sy.sprite.destroy()
+          this.gamedata.miss += 1
+          let x = swapn_list.findIndex(item => item === sy);
+          swapn_list.splice(x, 1);
+        }
+      }
+
+      this.count_symbol_wave -= 1
+      this.index_symbol += 1;
+      swapn_list.push(sy);
+
+      this.current_progress -= 1
+      this.updateProgress(this.current_progress)
+
+      this.lastSpawn = Time.time
+    }
   }
 
   setup_canvas() {
@@ -78,7 +186,7 @@ class GameCore {
       let result = this.recognitionToObject(sy);
       HelperTextElement("lb-detect", `${result.key}:${result.percent}:${sy.length}`);
       result.percent > 80 && this.killSymbol(result);
-
+      this.onActiveSkillDelegate && this.onActiveSkillDelegate(result)
       this.clearFrame(100);
     };
 
@@ -146,47 +254,113 @@ class GameCore {
     }, after);
   }
 
-  main_thread() {
+  now = 0
+  then;
+  fps = 60
+  interval = 1000 / this.fps
+  elapsed = 0
 
-    main_thread_id = setInterval(() => {
-      if (swapn_list.length === 0 && Time.time > 5) {
-        this.endGame();
-      }
-      Time.time += 33 / 1000;
+  pause() {
+    if (!this.isPause) {
+      this.isPause = true
+      cancelAnimationFrame(this.frame)
+      console.log('pause game')
+    }
+  }
 
-      let time = format_time(Time.time);
+  start() {
+    if (this.isPause) {
+      this.isPause = false
+      this.gameloop()
+    }
+  }
+
+  frame;
+  remainFPS = 3
+  countRemain = 2
+
+  gameloop(timeStamp) {
+
+    if (this.isPause) {
+      return
+    }
+
+    this.now = Date.now()
+    this.elapsed = (this.now - this.then)
+
+    this.update()
+    if (this.elapsed > this.interval) {
+
+      Time.deltaTime = (this.now - this.then) / 1000 * Time.timeScale
+      Time.time += Time.deltaTime
+
+      Time.unscaleDeltaTime = (this.now - this.then) / 1000
+      Time.unscaleTime += Time.unscaleDeltaTime
+
+      this.render()
+
+      let time = format_time(Time.unscaleTime);
       HelperTextElement("lb-time", time);
-    }, 33);
+
+      this.then = this.now
+    }
+
+    this.frame = requestAnimationFrame((timeStamp) => this.gameloop(timeStamp))
+  }
+
+  update() {
+    this.spawn_symbol()
+
+    if (this.countRemain > 0)
+      this.countRemain -= Time.deltaTime
+    else {
+      let _fps = Math.round(1 / this.elapsed * 1000)
+      HelperTextElement("lb-fps", `fps: ${_fps}`)
+
+      let combo = MathRandom(1, 10)
+      let score = MathRandom(100, 500)
+      this.setScore(false, this.gamedata.bonus, this.gamedata.bonus + score)
+      this.setCombo(true, this.gamedata.combo, this.gamedata.combo + combo)
+
+      this.gamedata.combo += combo
+      this.gamedata.bonus += score
+
+      this.countRemain = MathRandom(5, 10)
+
+    }
+  }
+
+  render() {
+    for (var i = 0; i < swapn_list.length; i++) {
+      let sy = swapn_list[i]
+      sy.update()
+    }
+
   }
 
   startGame() {
     this.resetGame()
-
     gameStart = true;
+    this.then = Date.now()
+    this.gameloop();
 
-    wave_data = this.createLevel(1, 3);
-    create_sy_id = this.spawnSymbol(2500);
-    count_sy = wave_data.length - 1;
-
-    this.main_thread();
-
-    console.log("start_game", count_sy);
+    console.log("start_game");
   }
 
   endGame() {
+    this.pause()
 
     gameStart = false;
-    clearInterval(main_thread_id);
-    clearInterval(create_sy_id);
-    let accurate = wave_data.length - this.gamedata.miss
-    let percent = (accurate / wave_data.length) * 100
+
+    let accurate = this.game_Progress - this.gamedata.miss
+    let percent = (accurate / patterns.length) * 100
     this.gamedata.accurate = percent.toFixed(2)
 
     this.gamedata.exp = this.gamedata.combo * 2 + this.gamedata.bonus * 0.25 + this.gamedata.accurate * 3
     this.gamedata.bonus = this.gamedata.bonus * 0.15
 
+    console.log("end_game", this.gamedata);
     this.onEndGameDelegate && this.onEndGameDelegate()
-    console.log("end_game");
   }
 
   resetGame() {
@@ -199,63 +373,28 @@ class GameCore {
       miss: 0,
     }
 
-    clearInterval(create_sy_id);
+    clearInterval(spawn_wave_id);
     this.clearFrame(0);
   }
 
-  createLevel(level, maxQt) {
-    let list = [];
-    let percent_hp_hight = 10 + level / 3;
-
-    for (var i = 0; i < maxQt; i++) {
-      let rand_pos = MathRandom(10, w - 30);
-      let rand = MathRandom(0, 3);
-      let data = symbol_data[rand];
-      data.speed += 0.25 * level;
-
-      let percent_hp = MathRandom(1, 100);
-      if (percent_hp < percent_hp_hight) data.hp = MathRandom(1, level);
-      let sy = { ...data, position: { x: rand_pos + 30, y: 0 } };
-      list.push(sy);
-    }
-    return list;
+  updateProgress(value) {
+    let max = 200
+    let progress = HelperElement('progress')
+    progress.style.width = value * max / this.game_Progress
   }
 
-  spawnSymbol(spawn_time) {
-    let id;
+  createSymbol(level, symbolname) {
+    let index = symbol_data.findIndex(item => item.name === symbolname)
 
-    id = setInterval(() => {
-      if (count_sy === 0) {
-        clearInterval(id);
-      }
+    let data = symbol_data[index];
+    data.speed += 0.25 * level;
 
-      let sy_data = wave_data[count_sy];
-      let path_img = path_host.concat(sy_data.img);
-
-      let sy = new GameSymbol(sy_data.name,
-        sy_data.speed,
-        sy_data.position,
-        sy_data.hp,
-        sy_data.score,
-        sy_data.img,
-        30, 30)
-
-      sy.onUpdate = () => {
-
-        if (sy.position.y > h) {
-          sy.sprite.destroy()
-          this.gamedata.miss += 1
-          let x = swapn_list.findIndex(item => item === sy);
-          swapn_list.splice(x, 1);
-        }
-      }
-
-      count_sy -= 1;
-      swapn_list.push(sy);
-      HelperTextElement("lb-level", `Level ${level}:${count_sy + 1}`);
-    }, spawn_time);
-
-    return id;
+    let percent_hp = MathRandom(1, 100);
+    let percent_hp_hight = 10 + level / 3;
+    if (percent_hp < percent_hp_hight) data.hp = MathRandom(1, level);
+    let rand_pos = MathRandom(10, w - 30);
+    let sy = { ...data, position: { x: rand_pos + 30, y: 0 } };
+    return sy
   }
 
   detectSymbol(array) {
@@ -320,32 +459,62 @@ class GameCore {
     let remap = swapn_list.map((item, index) => {
       return { ...item, index: index };
     });
-    let ar_mutilkill = remap.filter(item => item.name === x.key);
-    if (ar_mutilkill.length === 0) return;
+    let mutil_kill = remap.filter(item => item.name === x.key);
+    if (mutil_kill.length === 0) return;
 
-    this.gamedata.bonus += ar_mutilkill[0].score * ar_mutilkill.length;
-    let str_x = ar_mutilkill.length === 1 ? "" : `x${ar_mutilkill.length}`;
+    this.gamedata.bonus += mutil_kill[0].score * mutil_kill.length;
+    Network.instance.CmdSync({
+      matchid: this.matchInfo.id,
+      playerid: Network.instance.networkid,
+      score: this.gamedata.bonus,
+      combo: mutil_kill.length
+    })
 
-    HelperTextElement("lb-mutil", str_x)
-    HelperTextElement("lb-score", `Điểm    ${this.gamedata.bonus}`);
-    HelperTextElement("lb-detect", `${ar_mutilkill[0].name} : ${x.percent}%`);
+    let str_x = mutil_kill.length === 1 ? "" : `x${mutil_kill.length}`;
 
-    if (this.lastMuti < ar_mutilkill.length)
-      this.lastMuti = ar_mutilkill.length
+    // HelperTextElement("lb-mutil", str_x)
+    // HelperTextElement("lb-score", `Điểm    ${this.gamedata.bonus}`);
+    HelperTextElement("lb-detect", `${mutil_kill[0].name} : ${x.percent}%`);
 
-    setTimeout(() => {
-      HelperTextElement("lb-mutil", "");
-    }, 1000);
+    if (this.lastMuti < mutil_kill.length)
+      this.lastMuti = mutil_kill.length
 
-    console.log(">> mutil kill", ar_mutilkill.length);
+    console.log(">> mutil kill", mutil_kill.length);
     console.log(">> current list", swapn_list.length);
 
-    for (var i = 0; i < ar_mutilkill.length; i++) {
-      let index = ar_mutilkill[i].index;
+    for (var i = 0; i < mutil_kill.length; i++) {
+      let index = mutil_kill[i].index;
       let item = swapn_list[index];
+      console.log('item kill', item)
       item.takeDame(1);
+    }
+
+    // remove symbol from list
+    for (var i = 0; i < mutil_kill.length; i++) {
+      let index = mutil_kill[i].index;
       swapn_list.splice(index, 1);
     }
+  }
+
+  matchInfo = {
+    players: [],
+    id: -1,
+    status: 'none'
+  }
+
+  setMatchInfo(data) {
+    this.matchInfo = data
+  }
+
+  sync(data) {
+    let { playerid, score, combo } = data
+    let isMine = true
+    if (playerid !== Network.instance.networkid) {
+      isMine = false
+    }
+
+    this.setScore(isMine, score)
+    this.setCombo(isMine, combo)
   }
 
   async loadFile(path) {
@@ -354,14 +523,38 @@ class GameCore {
     let result = await response.json();
     return result;
   }
+
+  setScore(isMine, from, to) {
+    let mine = 'lb-score'
+    if (!isMine)
+      mine = mine.concat(' p2')
+
+    HelperFloatText(mine, from, to, 10)
+
+  }
+
+  setCombo(isMine, from, to) {
+
+    let mine = 'lb-mutil'
+    if (!isMine)
+      mine = mine.concat(' p2')
+    HelperElement('combo').style.display = 'flex'
+
+    HelperFloatText(mine, from, to, 100)
+
+    setTimeout(() => {
+      HelperElement('combo').style.display = 'none'
+    }, 1500);
+  }
 }
 
 function HelperElement(id) {
   return document.getElementById(id);
 }
 
-function HelperTextElement(id, text) {
+export function HelperTextElement(id, text) {
   let ele = document.getElementById(id);
+  if (!ele) return
   ele.textContent = text;
 }
 
@@ -369,11 +562,17 @@ function HelperFloatText(id, from, to, duration) {
   let floatID;
   let lb = HelperElement(id)
   let delta = from
+
   floatID = setInterval(() => {
-    if (delta > to) clearInterval(floatID)
-    delta += from
+    delta += 1
+    if (delta >= to) {
+      delta = to
+      clearInterval(floatID)
+
+      console.log('clear float', floatID)
+    }
     lb.textContent = delta
-  }, from / duration)
+  }, duration)
 }
 
 function HelperButton(id, press) {
@@ -405,11 +604,11 @@ function ArrayMax(array) {
   return array[index];
 }
 
-function format_time(ms) {
-  let total_minutes = parseInt(Math.floor(ms / 60));
+function format_time(ss) {
+  // let total_minutes = Math.floor(ms / 60);
 
-  let s = parseInt(ms % 60);
-  let m = parseInt(total_minutes % 60);
+  let m = Math.floor(ss / 60);
+  let s = parseInt(ss - m * 60)
 
   return `${m > 9 ? m : `0${m}`}:${s > 9 ? s : `0${s}`}`;
 }

@@ -5,13 +5,15 @@
   "dependencies": {
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
+    "react-social-login": "^3.4.13",
     "socket.io-client": "^4.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "https": "HTTPS=true react-scripts start"
   },
   "devDependencies": {
     "react-scripts": "latest"

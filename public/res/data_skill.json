@@ -1,0 +1,71 @@
+{
+    "res": [
+        {
+            "name": "Hàn băng",
+            "des": "Đóng băng đối phương",
+            "combo":["<","v",">"],
+            "cost":1500,
+            "type": "time",
+            "affect": 3,
+            "duration": 15,
+            "isActive": true,
+            "icon": "skill_6.png"
+        },
+        {
+            "name": "Tê liệt",
+            "des": "Gây choáng đối phương",
+            "combo":["<","v",">", ">"],
+            "cost":2500,
+            "type": "time",
+            "affect": 2,
+            "duration": 30,
+            "isActive": true,
+            "icon": "skill_2.png"
+        },
+        {
+            "name": "Sock",
+            "des": "Gây mù đối phương",
+            "combo":[">","v","<", "<"],
+            "cost":3500,
+            "type": "time",
+            "affect": 2,
+            "duration": 20,
+            "isActive": true,
+            "icon": "skill_4.png"
+        },
+        {
+            "name": "Khai sáng",
+            "des": "Tiêu diệt kí tự bỏ sót",
+            "combo":["v","v",">", ">"],
+            "cost":4000,
+            "type": "obj",
+            "affect": 5,
+            "duration": 15,
+            "isActive": true,
+            "icon": "skill_3.png"
+        },
+        {
+            "name": "Hỏa ngục",
+            "des": "Tiêu diệt tất cả kí tự hiện có",
+            "combo":[">","<","v", "^"],
+            "cost":3500,
+            "type": "hp",
+            "affect": 1,
+            "duration": 10,
+            "isActive": true,
+            "icon": "skill_1.png"
+        },
+        {
+            "name": "Tối cường",
+            "des": "Tăng sát thuơng thêm ",
+            "combo":[">","<",">", "<"],
+            "cost":1000,
+            "type": "hp",
+            "affect": 1,
+            "duration": 5,
+            "isActive": true,
+            "icon": "skill_5.png"
+        }
+    ],
+    "ver": "0.1"
+}

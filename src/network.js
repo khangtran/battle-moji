@@ -21,6 +21,15 @@ export default class Network {
         return instance
     }
 
+    static http = {
+        async loadFile(path) {
+            console.log(">> loadfile", path);
+            let response = await fetch(path);
+            let result = await response.json();
+            return result;
+        }
+    }
+
     setupEvent(cb) {
         this.socket.on('onConnected', (msg) => {
             this.networkid = msg.playerid
@@ -29,8 +38,6 @@ export default class Network {
 
         this.socket.on('onMatched', (msg) => {
             cb({ name: 'onMatched', data: msg })
-
-            console.log('>> matched', msg)
         })
 
         this.socket.on('onGameLoad', msg => {
@@ -38,17 +45,16 @@ export default class Network {
         })
 
         this.socket.on('onGameStart', msg => {
-            // this.onGameStart && this.onGameStart(msg)
+            cb({ name: 'onGameStart' })
         })
 
-        this.socket.on('onGameLoad', msg => {
-
-            console.log('gameData', msg)
+        this.socket.on('onGameSync', msg => {
+            cb({ name: 'onGameSync', data: msg })
         })
 
         this.socket.on('disconnect', msg => {
             cb({ name: 'disconnect', data: msg })
-            console.log('[Network] Disconnected', msg)
+            console.log('[Network] Disconnected >>', msg)
         })
     }
 
@@ -56,13 +62,28 @@ export default class Network {
         this.socket.connect()
     }
 
-    findMatch(playerinfo) {
+    CmdFindMatch(playerinfo) {
         this.socket.emit('create match', playerinfo)
-        console.log('[network] create-matched')
+        console.log('[network] find-matched')
     }
 
-    cancelMatch() {
-        this.socket.emit('cancelMatch')
+    CmdCancelMatch() {
+        this.socket.emit('cancel match')
+        console.log('[network] cancel-matched')
     }
 
+    CmdReady(matchid) {
+        this.socket.emit('ready', { matchid: matchid, playerid: this.networkid })
+        console.log('[network] ready')
+    }
+
+    CmdSync(data) {
+        this.socket.emit('gameSync', data)
+        console.log('[network] match-sync')
+    }
+
+    CmdGameEnd(matchid) {
+        this.socket.emit('gameEnd', { matchid: matchid, playerid: this.networkid })
+        console.log('[network] game-end')
+    }
 }
