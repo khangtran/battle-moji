@@ -126,9 +126,9 @@ export default class GamePage extends React.Component {
                     this.isFirstLoad = true
                 }
 
-                let _gameData = { symbols: [[">"], ["^"], ["v", ">"]] }
-                await this.prepareBoard(_gameData)
-                GameCoreInstance.startGame()
+                // let _gameData = { symbols: [[">"], ["^"], ["v", ">"]] }
+                // await this.prepareBoard(_gameData)
+                // GameCoreInstance.startGame()
             }
         }, 4000)
     }

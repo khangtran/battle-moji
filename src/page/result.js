@@ -16,9 +16,9 @@ export default class ResultPage extends React.Component {
         this.setState({
             isWin: data.isWin,
             combo: data.combo,
-            bonus: data.bonus,
+            bonus: Math.round(data.bonus),
             accurate: data.accurate,
-            exp: data.exp
+            exp: Math.round(data.exp)
         })
 
         // Network.instance.CmdGameEnd()
@@ -41,12 +41,12 @@ export default class ResultPage extends React.Component {
 
             <div className='row'>
                 <span>Thưởng</span>
-                <span>{this.state.bonus}</span>
+                <span>{this.state.bonus.toX000()}</span>
             </div>
 
             <div className='row'>
                 <span>Kinh nghiệm</span>
-                <span>{this.state.exp}</span>
+                <span>{this.state.exp.toX000()}</span>
             </div>
         </div>
     }
@@ -68,7 +68,7 @@ export default class ResultPage extends React.Component {
     render() {
         return <UIPage ref={c => this.page = c}>
             <div style={{ margin: 8 }} >
-                <div style={{ marginTop: 10,  margin: '16px 0 24px 0', }} >
+                <div style={{ marginTop: 10, margin: '16px 0 24px 0', }} >
                     {/* <span style={{ fontSize: 40, textAlign: 'center', }} >{this.state.isWin ? 'Chiến thắng' : 'Thất bại'}</span> */}
                     <span style={{ fontSize: 40, textAlign: 'center' }} >Kết quả</span>
                 </div>

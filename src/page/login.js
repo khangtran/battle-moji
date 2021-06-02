@@ -85,7 +85,7 @@ export default class LoginPage extends React.Component {
                             {/* <input ref={c => this.field_pass = c} placeholder='Mật khẩu' type='password' /> */}
 
                             <div>
-                                <button className='bt no-border bt-customer-login' onClick={() => this.onPressLogin()} >Khách</button>
+                                <button className='bt no-border bt-customer-login' style={{height:42}} onClick={() => this.onPressLogin()} >Khách</button>
                             </div>
                         </div>
 

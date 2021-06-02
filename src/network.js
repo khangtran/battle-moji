@@ -7,7 +7,7 @@ export default class Network {
     constructor() {
         this.socket = io(url, { autoConnect: false, reconnection: false })
         this.networkid = undefined
-
+        this.isConnected = false
     }
 
     /**
@@ -33,6 +33,7 @@ export default class Network {
     setupEvent(cb) {
         this.socket.on('onConnected', (msg) => {
             this.networkid = msg.playerid
+            this.isConnected = true
             cb({ name: 'connected', data: msg })
         })
 
@@ -54,12 +55,20 @@ export default class Network {
 
         this.socket.on('disconnect', msg => {
             cb({ name: 'disconnect', data: msg })
-            console.log('[Network] Disconnected >>', msg)
+        })
+
+        this.socket.on('onReceiveMsg', msg => {
+            cb({ name: 'onReceiveMsg', data: msg })
         })
     }
 
     connect() {
         this.socket.connect()
+    }
+
+    CmdSendMessage(msg) {
+        this.socket.emit('send-msg', msg)
+        console.log('[network] send-msg')
     }
 
     CmdFindMatch(playerinfo) {

@@ -13,10 +13,10 @@ export default class App extends React.Component {
 
   componentDidMount() {
 
-    PageManager.instance.addPage('login', this.login_page, false)
-    PageManager.instance.addPage('lobby', this.lobby_page)
+    PageManager.instance.addPage('login', this.login_page, true)
+    PageManager.instance.addPage('lobby', this.lobby_page, false)
     PageManager.instance.addPage('loading', this.loading_page)
-    PageManager.instance.addPage('game', this.game_page, true)
+    PageManager.instance.addPage('game', this.game_page, false)
     PageManager.instance.addPage('result', this.result_page)
 
     PageManager.instance.addTransition('login', 'lobby')
@@ -33,8 +33,12 @@ export default class App extends React.Component {
 
           setTimeout(() => {
             PageManager.instance.setTransition('lobby')
-            console.log('[network] connected')
           }, 250)
+          break
+
+        case 'onReceiveMsg':
+          this.lobby_page.onReceiveMessage(event.data)
+          console.log('receive msg')
           break
 
         case 'onMatched':

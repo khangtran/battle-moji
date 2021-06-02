@@ -1,8 +1,12 @@
 import React from "react"
 import Profile from "../Profile"
-import { List, ListWrap, UILobbyWaiting, UIPage } from "../Component"
+import { DOMHelper, List, ListWrap, UIChat, UILobbyWaiting, UIPage } from "../Component"
 import Network from "../network"
+import { Mission } from "../Mission"
 
+
+
+var MissionDaily = []
 export default class LobbyPage extends UIPage {
 
     state = {
@@ -10,7 +14,11 @@ export default class LobbyPage extends UIPage {
     }
 
     componentDidMount() {
+        let missa = new Mission('Nhiệm vụ ngày', 'Hoàn thành 5 trận', 5)
+        let missb = new Mission('Nhiệm vụ ngày', 'Thắng 3 trận', 3)
+        let missc = new Mission('Nhiệm vụ ngày', 'Tiêu diệt 30 ký tự', 30)
 
+        MissionDaily = [missa, missb, missc]
     }
 
     toggle() {
@@ -37,11 +45,27 @@ export default class LobbyPage extends UIPage {
         Network.instance.CmdCancelMatch()
     }
 
+    onBtnVIPAccount() {
+        console.log('>> buy vip 1 day')
+    }
+
+    onReceiveMessage(msg) {
+        this.chat.addChat(msg)
+    }
+
+    onSendMessage(msg) {
+        Network.instance.CmdSendMessage(msg)
+    }
+
+    onPressFriend() {
+        DOMHelper.toggleClass('chat', 'appear')
+    }
+
     render() {
         let default_profile = ['/res/profile_me.jpg', '/res/profile_vy.jpg']
         let avatar_default = '/res/avatar_default.png'
         let avatar = Profile.instance.name === 'vyvy' ? default_profile[1] : Profile.instance.name === 'khang' ? default_profile[0] : avatar_default
-        
+
         let data = this.state.data || 'Đang tải'
 
         return <UIPage ref={c => this.page = c} >
@@ -64,37 +88,42 @@ export default class LobbyPage extends UIPage {
                 </div>
 
                 <div style={{ flex: 1, margin: 8, }} >
-                    {/* <span>Bộ kĩ năng</span>
-                    <ListWrap data={list_skill} render={(item, index) => <div key={index} style={{ width: 100, height: 125, margin: '8px 10px 10px 0' }}>
-                        <img alt='hình' src={`/res/gfx/${item.img}`} style={{ width: 100, height: 100, border: 0 }} />
-                        <div style={{ marginLeft: 1 }}>
-                            <span style={{ fontSize: 15, fontWeight: 600, marginTop: 5 }} >{item.name}</span>
-                        </div>
-                    </div>} />
 
-                    <span>Sưu tầm</span>
-                    <List data={list_skill} render={(item, index) => <div key={index} style={{ marginTop: 8, }}>
-                        <div style={{ flexDirection: "row" }}>
-                            <img src={`/res/gfx/${item.img}`} style={{ width: 100, height: 100 }} />
-                            <div style={{ marginLeft: 5 }}>
-                                <span style={{ fontSize: 15, fontWeight: 600 }}>{item.name}</span>
-                                <span style={{ fontSize: 13 }}> {`Yêu cầu Level ${item.require}. `}</span>
-                                <span style={{ fontSize: 13 }}> {`${item.des} ${item.affect}s`}</span>
+                    <div className='ui' style={{ right: 8, border: '1px solid lightgray', }} onClick={() => this.onBtnVIPAccount()}>
+                        <div className='' style={{ margin: '8px', }}>
+                            <span>Tài khoản VIP</span>
+                            <span>+50% exp</span>
+                            <span>+50% kcoin</span>
+
+                            <div style={{ borderTop: '1px solid rgb(0, 195, 255)', marginTop: 8, paddingTop: 4 }} >
+                                <span>Ưu đãi 50.000đ</span>
                             </div>
                         </div>
-                    </div>} /> */}
+                    </div>
+
+                    <div className='ui' style={{ top: '30%', right: 8, border: '1px solid lightgray', }} onClick={() => this.onBtnVIPAccount()}>
+                        <div className='box' >
+                            <span>Nhiệm vụ ngày</span>
+                            <div className='line' />
+                            {MissionDaily.map((item, index) => <span key={index} style={{}} >{item.toString()}</span>)}
+                        </div>
+                    </div>
+
+                    <div className='ui chat' id='chat' style={{ left: 8, }} >
+                        <UIChat ref={c => this.chat = c}
+                            onSendMessage={(msg) => this.onSendMessage(msg)} />
+                    </div>
+
                 </div>
 
                 <div id="ui-lobby" className="row" style={{ width: '80%', alignSelf: "center", marginBottom: 12 }} >
-                    <button id="bt-friend" className="bt">
+                    <button id="bt-friend" className="bt" onClick={() => this.onPressFriend()}>
                         Bạn bè
                     </button>
                     <button id="bt-play" className="bt" onClick={() => this.onBtFindMatch()}>
                         Tìm trận
                     </button>
-                    <button id="bt-skill" className="bt">
-                        Cửa hàng
-                    </button>
+
                 </div>
 
                 <UILobbyWaiting ref={c => this.waitingMatch = c} onCancelPress={() => this.onCancelPress()} />

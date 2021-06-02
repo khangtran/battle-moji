@@ -69,7 +69,7 @@ class GameCore {
 
     }
     this.current_progress = this.game_Progress
-    this.updateProgress(this.game_Progress)
+    // this.updateProgress(this.game_Progress)
     console.log('patterns', patterns, this.game_Progress)
     return patterns
   }
