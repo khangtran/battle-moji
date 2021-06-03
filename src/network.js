@@ -1,7 +1,7 @@
 import { io } from "socket.io-client"
 
-const url = 'http://192.168.43.47'
-// const url = 'http://nameless-shelf-95293.herokuapp.com'
+// const url = 'http://192.168.43.47'
+const url = 'http://nameless-shelf-95293.herokuapp.com'
 
 let instance;
 export default class Network {
