@@ -1,11 +1,12 @@
 import { io } from "socket.io-client"
 
-const url = 'http://192.168.43.47:4646'
+// const url = 'http://192.168.43.47:4646'
+const url = 'http://nameless-shelf-95293.herokuapp.com'
 
 let instance;
 export default class Network {
     constructor() {
-        this.socket = io(url, { autoConnect: false, reconnection: false })
+        this.socket = io(url, { autoConnect: false, reconnection: false, })
         this.networkid = undefined
         this.isConnected = false
     }
@@ -22,12 +23,12 @@ export default class Network {
     }
 
     static http = {
-        async loadFile(path) {
-            console.log(">> loadfile", path);
+        async get(path) {
+            console.log("[http] get", path);
             let response = await fetch(path);
             let result = await response.json();
             return result;
-        }
+        },
     }
 
     setupEvent(cb) {

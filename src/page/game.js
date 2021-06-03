@@ -31,7 +31,7 @@ export default class GamePage extends React.Component {
     castTime = 3000
     async componentDidMount() {
 
-        let data = await Network.http.loadFile(url_data)
+        let data = await Network.http.get(url_data)
         let res = data.res
         let list = [res[0], res[3], res[2]]
 
