@@ -93,6 +93,13 @@ export default class GamePage extends React.Component {
         setTimeout(() => {
             if (!this.page.state.isShow) return
 
+            // init new game
+            let { players } = GameCoreInstance.matchInfo
+            // let players = [{ name: 'player1' }, { name: 'player2' }]
+            HelperTextElement('lb-name', players[0].name)
+            HelperTextElement('lb-name p2', players[1].name)
+
+            // countdown 3s gamestart
             let time = 3
             let id;
             id = setInterval(() => {
@@ -107,18 +114,6 @@ export default class GamePage extends React.Component {
             }, 1000)
         }, 50)
 
-
-        // set init here
-        setTimeout(() => {
-            if (!this.page.state.isShow) return
-
-            // let { players } = GameCoreInstance.matchInfo
-            let players = [{ name: 'player1' }, { name: 'player2' }]
-            HelperTextElement('lb-name', players[0].name)
-            HelperTextElement('lb-name p2', players[1].name)
-
-        }, 1000)
-
         setTimeout(async () => {
             if (this.page.state.isShow) {
                 if (!this.isFirstLoad) {
@@ -126,9 +121,13 @@ export default class GamePage extends React.Component {
                     this.isFirstLoad = true
                 }
 
+
+                // Debug test, set data then start
                 // let _gameData = { symbols: [[">"], ["^"], ["v", ">"]] }
                 // await this.prepareBoard(_gameData)
-                // GameCoreInstance.startGame()
+
+                // start game. Importance for play network !!!
+                GameCoreInstance.startGame()
             }
         }, 4000)
     }
@@ -172,7 +171,7 @@ export default class GamePage extends React.Component {
                 </div>
 
                 <div className="ui score">
-                    <span id='lb-name'>[Tên người chơi]</span>
+                    <span id='lb-name' style={{ fontSize: 15 }}>[Tên người chơi]</span>
                     <div className='row' style={{ justifyContent: 'flex-start', alignItems: 'baseline', marginTop: 10, }}  >
                         <span id="lb-score" style={{}} >0</span>
                         <span style={{ fontSize: 13, marginLeft: 5 }}>điểm</span>
@@ -186,7 +185,9 @@ export default class GamePage extends React.Component {
                 </div>
 
                 <div className='ui score-p2' style={{ textAlign: "right" }}>
-                    <span id='lb-name p2'>[Tên đối thủ]</span>
+                    <div>
+                        <span id='lb-name p2' style={{ fontSize: 15 }}>[Tên đối thủ]</span>
+                    </div>
                     <div className='row' style={{ justifyContent: 'flex-end', alignItems: 'baseline', marginTop: 10, }}>
                         <span id="lb-score p2" style={{ marginTop: 5 }} >0</span>
                         <span style={{ fontSize: 13, marginLeft: 5 }}>điểm</span>

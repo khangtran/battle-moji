@@ -14,6 +14,7 @@ export default class LobbyPage extends UIPage {
     }
 
     componentDidMount() {
+
         let missa = new Mission('Nhiệm vụ ngày', 'Hoàn thành 5 trận', 5)
         let missb = new Mission('Nhiệm vụ ngày', 'Thắng 3 trận', 3)
         let missc = new Mission('Nhiệm vụ ngày', 'Tiêu diệt 30 ký tự', 30)
@@ -37,12 +38,12 @@ export default class LobbyPage extends UIPage {
 
     onBtFindMatch() {
 
-        Network.instance.CmdFindMatch({ playername: Profile.instance.name })
+        Network.Client.CmdFindMatch({ playername: Profile.instance.name })
         this.waitingMatch.toggle()
     }
 
     onCancelPress() {
-        Network.instance.CmdCancelMatch()
+        Network.Client.CmdCancelMatch()
     }
 
     onBtnVIPAccount() {
@@ -54,7 +55,7 @@ export default class LobbyPage extends UIPage {
     }
 
     onSendMessage(msg) {
-        Network.instance.CmdSendMessage(msg)
+        Network.Client.CmdSendMessage(msg)
     }
 
     onPressFriend() {

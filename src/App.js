@@ -8,10 +8,14 @@ import LoginPage from "./page/login";
 import PageManager from "./PageManager";
 import Network from "./network";
 import GameCoreInstance from "./gamecore";
+import NewsPage from "./page/news";
+import { Device, DOMHelper } from "./Component";
 
 export default class App extends React.Component {
 
   componentDidMount() {
+
+    // PageManager.instance.addPage('news', this.news_page, true)
 
     PageManager.instance.addPage('login', this.login_page, true)
     PageManager.instance.addPage('lobby', this.lobby_page, false)
@@ -25,7 +29,7 @@ export default class App extends React.Component {
     PageManager.instance.addTransition('game', 'result')
     PageManager.instance.addTransition('result', 'lobby')
 
-    Network.instance.setupEvent(async event => {
+    Network.Client.setupEvent(async event => {
       console.log(`[network] ${event.name} `, event.data)
 
       switch (event.name) {
@@ -51,7 +55,7 @@ export default class App extends React.Component {
         case 'onGameLoad':
           let gameData = JSON.parse(event.data)
           await this.game_page.prepareBoard(gameData)
-          // Network.instance.ready(GameCoreInstance.matchInfo.id)
+          Network.Client.CmdReady(GameCoreInstance.matchInfo.id)
           break
 
         case 'onGameStart':
@@ -61,20 +65,79 @@ export default class App extends React.Component {
         case 'onGameSync':
           GameCoreInstance.sync(event.data)
           break
+
+        case 'pong':
+          Network.Client.setNetSpeed(event.data)
+          break
       }
     })
 
-    console.log('PageManagerList', PageManager.instance.list)
+    this.requireInstallApp()
+  }
+
+  install_event = null
+  requireInstallApp() {
+
+    DOMHelper.findByID('require-install').style.display = 'none'
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then(() => { console.log('Service Worker Registered'); });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+
+      DOMHelper.findByID('require-install').style.display = 'flex'
+      this.install_event = e
+      console.log('Ready to Installable')
+    })
+
+    window.addEventListener('appinstalled', () => {
+
+      DOMHelper.findByID('require-install').style.display = 'none'
+      console.log('PWA was installed');
+    });
+  }
+
+  onDownloadPress() {
+
+    this.install_event.prompt()
+    this.install_event.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the A2HS prompt');
+      } else {
+        console.log('User dismissed the A2HS prompt');
+      }
+      this.install_event = null;
+    });
+    console.log('install prompt')
   }
 
   backToLobby() {
     PageManager.instance.setTransition('lobby')
   }
 
+  renderPopup() {
+    return <div id='require-install' className='ui' style={{ width: Device.width, bottom: 0 }}>
+      <div style={{ backgroundColor: 'whitesmoke' }}>
+        <div className='row-tab' style={{ margin: 8 }} >
+          <img src='/launcher_icon.png' style={{ width: 60, height: 60, borderRadius: 10 }} />
+          <div style={{ fontSize: 15, marginLeft: 8 }}>
+            <span>Battle Syaster</span>
+            <span style={{ color: 'gray' }}>Phiên bản APLA TEST v0.1 build 17052021</span>
+            <button id='bt-install' className='' style={{ padding: '5px 10px', borderRadius: '3px', width: '30%', border: 'none', backgroundColor: 'blue', color: 'white' }} onClick={() => this.onDownloadPress()}>Cài đặt</button>
+          </div>
+        </div>
+      </div >
+    </div >
+  }
+
   render() {
     return (
       <div id="main">
-
+        <NewsPage ref={c => this.news_page = c} />
         <LoginPage ref={c => this.login_page = c} />
         <LobbyPage ref={c => this.lobby_page = c} />
         <GamePage ref={c => this.game_page = c} />
@@ -83,6 +146,12 @@ export default class App extends React.Component {
         />
 
         <LoadingPage ref={c => this.loading_page = c} />
+
+        <React.Fragment>
+          {
+            this.renderPopup()
+          }
+        </React.Fragment>
       </div>
     );
   }

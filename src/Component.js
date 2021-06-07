@@ -228,7 +228,7 @@ export class UIChat extends React.Component {
             let id;
             let time = 0
             id = setInterval(() => {
-                if (Network.instance.isConnected) {
+                if (Network.Client.isConnected) {
                     resolve(true)
                     clearInterval(id)
 
@@ -248,7 +248,7 @@ export class UIChat extends React.Component {
 
     onKeyDown(key) {
         if (key === 'Enter') {
-            let msg = { name: Profile.instance.name, playerid: Network.instance.networkid, content: this.field.value }
+            let msg = { name: Profile.instance.name, playerid: Network.Client.networkid, content: this.field.value }
             this.addChat(msg)
             this.field.value = ''
             this.props.onSendMessage && this.props.onSendMessage(msg)
@@ -267,6 +267,11 @@ export class UIChat extends React.Component {
         this.setState({ alert: msg })
     }
 
+    onFocus() {
+        // this.field.
+        
+    }
+
     renderChat() {
 
         return <div style={{ flex: 1 }}>
@@ -276,16 +281,16 @@ export class UIChat extends React.Component {
             <List ref={c => this.list = c} data={this.state.data} render={(item, index) => <div key={index}>
                 <div className='row-tab chat-msg' style={{
                     margin: 8, fontSize: 15,
-                    color: item.playerid !== Network.instance.networkid ? "black" : 'gray',
-                    justifyContent: item.playerid !== Network.instance.networkid ? 'flex-start' : 'flex-end'
+                    color: item.playerid !== Network.Client.networkid ? "black" : 'gray',
+                    justifyContent: item.playerid !== Network.Client.networkid ? 'flex-start' : 'flex-end'
                 }} >
-                    <span style={{ display: item.playerid !== Network.instance.networkid ? 'flex' : 'none' }}>{item.name}:</span>
+                    <span style={{ display: item.playerid !== Network.Client.networkid ? 'flex' : 'none' }}>{item.name}:</span>
                     <span style={{ marginLeft: 2 }}>{item.content}</span>
                 </div>
             </div>} />
 
             <input ref={c => this.field = c} placeholder='Nội dung tin nhắn'
-                type='text' onFocus={() => this.field.value = ''} onKeyDown={(e) => this.onKeyDown(e.key)} />
+                type='text' onFocus={() => this.onFocus()} onKeyDown={(e) => this.onKeyDown(e.key)} />
         </div>
     }
 

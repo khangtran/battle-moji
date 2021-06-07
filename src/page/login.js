@@ -10,6 +10,30 @@ export default class LoginPage extends React.Component {
 
     componentDidMount() {
 
+        let agent = navigator.userAgent
+        if (agent.search('Iphone') === -1 && agent.search('Android') === -1) {
+            let root = document.getElementById('root')
+            root.removeChild(root.childNodes[0])
+
+            let span = document.createElement('span')
+
+            span.style.textAlign = 'center'
+            span.style.marginTop = '10%'
+            span.style.fontSize = 30
+            span.innerHTML = 'Syaster'
+
+            let span2 = document.createElement('span')
+            span2.style.textAlign = 'center'
+            span2.style.marginTop = '10px'
+            span2.style.fontSize = 20
+            span2.style.color = 'gray'
+            span2.innerHTML = 'Opps! <br>Phiên bản hiện tại không hỗ trợ máy tính.'
+
+            root.appendChild(span)
+            root.appendChild(span2)
+            return
+        }
+
         setTimeout(() => {
             if (!this.page.state.isShow)
                 return
@@ -35,7 +59,7 @@ export default class LoginPage extends React.Component {
         // this.pop_loading.toggle()
         // localStorage.setItem('@profile', JSON.stringify(Profile.instance))
         // PageManager.instance.setTransition('lobby')
-        Network.instance.connect()
+        Network.Client.connect()
 
         // let playFullscreen = confirm('Bạn muốn chơi toàn màn hình ?')
         // if (playFullscreen) {
@@ -85,7 +109,7 @@ export default class LoginPage extends React.Component {
                             {/* <input ref={c => this.field_pass = c} placeholder='Mật khẩu' type='password' /> */}
 
                             <div>
-                                <button className='bt no-border bt-customer-login' style={{height:42}} onClick={() => this.onPressLogin()} >Khách</button>
+                                <button className='bt no-border bt-customer-login' style={{ height: 42 }} onClick={() => this.onPressLogin()} >Khách</button>
                             </div>
                         </div>
 

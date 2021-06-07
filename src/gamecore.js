@@ -317,15 +317,15 @@ class GameCore {
       let _fps = Math.round(1 / this.elapsed * 1000)
       HelperTextElement("lb-fps", `fps: ${_fps}`)
 
-      let combo = MathRandom(1, 10)
-      let score = MathRandom(100, 500)
-      this.setScore(false, this.gamedata.bonus, this.gamedata.bonus + score)
-      this.setCombo(true, this.gamedata.combo, this.gamedata.combo + combo)
+      // let combo = MathRandom(1, 10)
+      // let score = MathRandom(100, 500)
+      // this.setScore(false, this.gamedata.bonus, this.gamedata.bonus + score)
+      // this.setCombo(true, this.gamedata.combo, this.gamedata.combo + combo)
 
-      this.gamedata.combo += combo
-      this.gamedata.bonus += score
+      // this.gamedata.combo += combo
+      // this.gamedata.bonus += score
 
-      this.countRemain = MathRandom(5, 10)
+      this.countRemain = 2
 
     }
   }
@@ -463,9 +463,9 @@ class GameCore {
     if (mutil_kill.length === 0) return;
 
     this.gamedata.bonus += mutil_kill[0].score * mutil_kill.length;
-    Network.instance.CmdSync({
+    Network.Client.CmdSync({
       matchid: this.matchInfo.id,
-      playerid: Network.instance.networkid,
+      playerid: Network.Client.networkid,
       score: this.gamedata.bonus,
       combo: mutil_kill.length
     })
@@ -509,7 +509,7 @@ class GameCore {
   sync(data) {
     let { playerid, score, combo } = data
     let isMine = true
-    if (playerid !== Network.instance.networkid) {
+    if (playerid !== Network.Client.networkid) {
       isMine = false
     }
 
@@ -529,19 +529,21 @@ class GameCore {
     if (!isMine)
       mine = mine.concat(' p2')
 
-    HelperFloatText(mine, from, to, 10)
-
+    // HelperFloatText(mine, from, to, 10)
+    HelperTextElement(mine, to)
   }
 
   setCombo(isMine, from, to) {
+
+    if (to === 1) return
 
     let mine = 'lb-mutil'
     if (!isMine)
       mine = mine.concat(' p2')
     HelperElement('combo').style.display = 'flex'
 
-    HelperFloatText(mine, from, to, 100)
-
+    // HelperFloatText(mine, from, to, 100)
+    HelperTextElement(mine, to)
     setTimeout(() => {
       HelperElement('combo').style.display = 'none'
     }, 1500);
