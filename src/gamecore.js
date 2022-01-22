@@ -14,7 +14,6 @@ let path_host =
 var touch_reconition, symbol_data;
 
 let gameStart = false;
-let main_thread_id, spawn_wave_id;
 let patterns = [],
   level = 1,
   count_sy,
@@ -61,7 +60,7 @@ class GameCore {
       let wave = data[i]
       for (var j = 0; j < wave.length; j++) {
         let code = wave[j]
-        let symbol = this.createSymbol(1, code)
+        let symbol = this.createSymbol(i+1, code)
         waves.push(symbol)
       }
       patterns.push(waves)
@@ -86,6 +85,7 @@ class GameCore {
 
   setupWave() {
     this.index_symbol = 0
+    this.lastSpawn = 0
 
     this.current_wave = patterns[this.index_wave]
     this.wave_size = this.current_wave.length
@@ -268,13 +268,6 @@ class GameCore {
     }
   }
 
-  start() {
-    if (this.isPause) {
-      this.isPause = false
-      this.gameloop()
-    }
-  }
-
   frame;
   remainFPS = 3
   countRemain = 2
@@ -317,16 +310,7 @@ class GameCore {
       let _fps = Math.round(1 / this.elapsed * 1000)
       HelperTextElement("lb-fps", `fps: ${_fps}`)
 
-      // let combo = MathRandom(1, 10)
-      // let score = MathRandom(100, 500)
-      // this.setScore(false, this.gamedata.bonus, this.gamedata.bonus + score)
-      // this.setCombo(true, this.gamedata.combo, this.gamedata.combo + combo)
-
-      // this.gamedata.combo += combo
-      // this.gamedata.bonus += score
-
       this.countRemain = 2
-
     }
   }
 
@@ -335,12 +319,13 @@ class GameCore {
       let sy = swapn_list[i]
       sy.update()
     }
-
   }
 
   startGame() {
     this.resetGame()
+
     gameStart = true;
+
     this.then = Date.now()
     this.gameloop();
 
@@ -365,7 +350,9 @@ class GameCore {
 
   resetGame() {
     count_sy = 0;
-
+    this.isPause = false
+    this.index_wave = 0
+    this.isLoadWave = false
     this.gamedata = {
       accurate: 0,
       combo: 0,
@@ -373,7 +360,6 @@ class GameCore {
       miss: 0,
     }
 
-    clearInterval(spawn_wave_id);
     this.clearFrame(0);
   }
 
@@ -383,11 +369,17 @@ class GameCore {
     progress.style.width = value * max / this.game_Progress
   }
 
+  /**
+   * Khởi tạo mảng ký tự rơi xuống
+   * @param {*} level Cấp độ ký tự, cấp độ cao tốc độ rơi xuống nhanh
+   * @param {*} symbolname Tên mã ký tự
+   * @returns {Array} Trả về mảng 
+   */
   createSymbol(level, symbolname) {
     let index = symbol_data.findIndex(item => item.name === symbolname)
 
     let data = symbol_data[index];
-    data.speed += 0.25 * level;
+    data.speed += 0.5 * level;
 
     let percent_hp = MathRandom(1, 100);
     let percent_hp_hight = 10 + level / 3;
@@ -513,8 +505,8 @@ class GameCore {
       isMine = false
     }
 
-    this.setScore(isMine, score)
-    this.setCombo(isMine, combo)
+    this.setScore(isMine, 0, score)
+    this.setCombo(isMine, 0, combo)
   }
 
   async loadFile(path) {

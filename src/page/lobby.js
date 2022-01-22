@@ -1,8 +1,9 @@
 import React from "react"
 import Profile from "../Profile"
-import { DOMHelper, List, ListWrap, UIChat, UILobbyWaiting, UIPage } from "../Component"
+import { DOMHelper, List, ListWrap, ProgressBar, UIChat, UILobbyWaiting, UIPage } from "../Component"
 import Network from "../network"
 import { Mission } from "../Mission"
+import PageManager from "../PageManager"
 
 
 
@@ -74,14 +75,16 @@ export default class LobbyPage extends UIPage {
                 <div style={{ background: 'rgba(225,225,225,0.8)', color: 'black' }}>
                     <div className='row' style={{ margin: '8px', fontSize: 20, }}>
                         <div className='row' style={{ alignItems: 'center' }} >
-                            <img src={avatar} style={{ width: 50, height: 50, borderRadius: '50%', border: '2px solid mediumspringgreen' }} />
+                            <img src={avatar} style={{ width: 50, height: 50, borderRadius: '50%', border: '2px solid mediumspringgreen' }} onClick={() => PageManager.instance.setTransition('account')} />
                             <div style={{ marginLeft: 5 }}>
                                 <span style={{ fontSize: 16, fontWeight: 'bold' }} >{data && data.name}</span>
-                                <span style={{ fontSize: 14 }}>Level 1</span>
+                                <span style={{ fontSize: 14 }}>Cấp {Profile.instance.level.level}</span>
+
+                                <ProgressBar ref={c => this.progressLevel = c} />
                             </div>
                         </div>
 
-                        <div style={{ textAlign: "right" }} >
+                        <div style={{ textAlign: "right", fontSize: 15 }} >
                             <span style={{ color: 'black' }}> {data && data.kcoin} KC</span>
                             <span style={{ color: 'black' }} > {data && data.kgold} KG</span>
                         </div>
@@ -119,7 +122,7 @@ export default class LobbyPage extends UIPage {
 
                 <div id="ui-lobby" className="row" style={{ width: '80%', alignSelf: "center", marginBottom: 12 }} >
                     <button id="bt-friend" className="bt" onClick={() => this.onPressFriend()}>
-                        Bạn bè
+                        Kênh chung
                     </button>
                     <button id="bt-play" className="bt" onClick={() => this.onBtFindMatch()}>
                         Tìm trận

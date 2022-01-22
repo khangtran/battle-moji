@@ -9,25 +9,26 @@ import PageManager from "./PageManager";
 import Network from "./network";
 import GameCoreInstance from "./gamecore";
 import NewsPage from "./page/news";
-import { Device, DOMHelper } from "./Component";
+import { Device, DOMHelper, UIPopup } from "./Component";
+import AccountPage from "./page/account";
 
 export default class App extends React.Component {
 
   componentDidMount() {
-
-    // PageManager.instance.addPage('news', this.news_page, true)
 
     PageManager.instance.addPage('login', this.login_page, true)
     PageManager.instance.addPage('lobby', this.lobby_page, false)
     PageManager.instance.addPage('loading', this.loading_page)
     PageManager.instance.addPage('game', this.game_page, false)
     PageManager.instance.addPage('result', this.result_page)
+    PageManager.instance.addPage('account', this.account_page, false)
 
     PageManager.instance.addTransition('login', 'lobby')
     PageManager.instance.addTransition('lobby', 'loading')
     PageManager.instance.addTransition('loading', 'game')
     PageManager.instance.addTransition('game', 'result')
     PageManager.instance.addTransition('result', 'lobby')
+    PageManager.instance.addTransition('lobby', 'account')
 
     Network.Client.setupEvent(async event => {
       console.log(`[network] ${event.name} `, event.data)
@@ -72,13 +73,11 @@ export default class App extends React.Component {
       }
     })
 
-    this.requireInstallApp()
+    // this.requireInstallApp()
   }
 
   install_event = null
   requireInstallApp() {
-
-    DOMHelper.findByID('require-install').style.display = 'none'
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
@@ -89,14 +88,14 @@ export default class App extends React.Component {
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault()
 
-      DOMHelper.findByID('require-install').style.display = 'flex'
       this.install_event = e
-      console.log('Ready to Installable')
+
+      this.popInstall.toggle()
+      console.log('Ready to installable')
     })
 
     window.addEventListener('appinstalled', () => {
 
-      DOMHelper.findByID('require-install').style.display = 'none'
       console.log('PWA was installed');
     });
   }
@@ -120,18 +119,18 @@ export default class App extends React.Component {
   }
 
   renderPopup() {
-    return <div id='require-install' className='ui' style={{ width: Device.width, bottom: 0 }}>
+    return <UIPopup ref={c => this.popInstall = c} style={{ marginTop: 0 }} >
       <div style={{ backgroundColor: 'whitesmoke' }}>
         <div className='row-tab' style={{ margin: 8 }} >
           <img src='/launcher_icon.png' style={{ width: 60, height: 60, borderRadius: 10 }} />
           <div style={{ fontSize: 15, marginLeft: 8 }}>
-            <span>Battle Syaster</span>
+            <span style={{ color: 'black' }}>Battle Syaster</span>
             <span style={{ color: 'gray' }}>Phiên bản APLA TEST v0.1 build 17052021</span>
             <button id='bt-install' className='' style={{ padding: '5px 10px', borderRadius: '3px', width: '30%', border: 'none', backgroundColor: 'blue', color: 'white' }} onClick={() => this.onDownloadPress()}>Cài đặt</button>
           </div>
         </div>
-      </div >
-    </div >
+      </div>
+    </UIPopup>
   }
 
   render() {
@@ -144,14 +143,16 @@ export default class App extends React.Component {
         <ResultPage ref={c => this.result_page = c}
           onBackPress={() => this.backToLobby()}
         />
-
+        <AccountPage ref={c => this.account_page = c} />
         <LoadingPage ref={c => this.loading_page = c} />
 
-        <React.Fragment>
-          {
-            this.renderPopup()
-          }
-        </React.Fragment>
+        {
+          this.renderPopup()
+        }
+
+        {
+          // this.renderPopAlert()
+        }
       </div>
     );
   }

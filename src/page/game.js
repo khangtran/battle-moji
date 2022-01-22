@@ -1,5 +1,5 @@
 import React from "react";
-import { UIPage } from "../Component";
+import { Device, UIPage } from "../Component";
 import GameCoreInstance, { HelperTextElement } from "../gamecore";
 import { Time } from "../GameScript";
 import Network from "../network";
@@ -94,10 +94,12 @@ export default class GamePage extends React.Component {
             if (!this.page.state.isShow) return
 
             // init new game
-            let { players } = GameCoreInstance.matchInfo
-            // let players = [{ name: 'player1' }, { name: 'player2' }]
-            HelperTextElement('lb-name', players[0].name)
-            HelperTextElement('lb-name p2', players[1].name)
+            let debug_player = [{ name: 'player1' }, { name: 'player2' }]
+            let { players } = GameCoreInstance.matchInfo || debug_player
+
+            let index_p1 = players.findIndex(p => p.playerid === Network.Client.networkid)
+            HelperTextElement('lb-name', players[index_p1].name)
+            HelperTextElement('lb-name p2', players[index_p1 === 0 ? 1 : 0].name)
 
             // countdown 3s gamestart
             let time = 3
@@ -121,8 +123,7 @@ export default class GamePage extends React.Component {
                     this.isFirstLoad = true
                 }
 
-
-                // Debug test, set data then start
+                // Debug test, set data then start game
                 // let _gameData = { symbols: [[">"], ["^"], ["v", ">"]] }
                 // await this.prepareBoard(_gameData)
 
@@ -164,12 +165,6 @@ export default class GamePage extends React.Component {
             <div id="ui-game" style={{ backgroundImage: '' }} >
                 <canvas id="canvas" />
 
-                <div className='ui wave'>
-                    <div style={{ width: 200, height: 4, border: '1px solid lightgray' }}>
-                        <div id='progress' style={{ height: 2, margin: 1, }} />
-                    </div>
-                </div>
-
                 <div className="ui score">
                     <span id='lb-name' style={{ fontSize: 15 }}>[Tên người chơi]</span>
                     <div className='row' style={{ justifyContent: 'flex-start', alignItems: 'baseline', marginTop: 10, }}  >
@@ -189,8 +184,8 @@ export default class GamePage extends React.Component {
                         <span id='lb-name p2' style={{ fontSize: 15 }}>[Tên đối thủ]</span>
                     </div>
                     <div className='row' style={{ justifyContent: 'flex-end', alignItems: 'baseline', marginTop: 10, }}>
-                        <span id="lb-score p2" style={{ marginTop: 5 }} >0</span>
                         <span style={{ fontSize: 13, marginLeft: 5 }}>điểm</span>
+                        <span id="lb-score p2" style={{ marginTop: 5 }} >0</span>
                     </div>
                     <div className='row --score' style={{ justifyContent: 'flex-end', }} >
                         <span style={{ fontSize: 20, marginLeft: 5 }}>hit</span>
@@ -209,6 +204,12 @@ export default class GamePage extends React.Component {
 
                 <div className="ui time">
                     <span id="lb-time">00:00</span>
+                </div>
+
+                <div className='ui wave'>
+                    <div style={{ width: Device.percentWidth(60), height: 4, border: '1px solid lightgray' }}>
+                        <div id='progress' style={{ height: 2, margin: 1, }} />
+                    </div>
                 </div>
 
                 <div className="ui detect">

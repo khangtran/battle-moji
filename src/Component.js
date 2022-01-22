@@ -64,18 +64,32 @@ export class UIPopup extends React.Component {
 
     render() {
         return <React.Fragment>
-            {
-                this.state.isShow &&
+            {this.state.isShow &&
                 <div className='ui bg-blur' style={{ width: '100%', height: '100%', }} >
-                    <div className='' style={{ alignSelf: 'center', width: '100%', marginTop: '80%', height: '20%' }} >
+                    <div style={{ alignSelf: 'center', width: '100%', marginTop: '80%', height: '20%', ...this.props.style }} >
                         <div style={{ backgroundColor: 'black', color: 'white', }} >
-                            <span style={{ margin: 8, textAlign: 'center' }} >{this.props.text || 'Đang tải'}</span>
+                            {
+                                this.props.children
+                            }
                         </div>
                     </div>
                 </div>
             }
         </React.Fragment>
+    }
+}
 
+export class UIPopupText extends React.Component {
+
+
+    toggle() {
+        this.pop.toggle()
+    }
+
+    render() {
+        return <UIPopup ref={c => this.pop = c} >
+            <span style={{ margin: 8, textAlign: 'center' }} >{this.props.text || 'Đang tải'}</span>
+        </UIPopup>
     }
 }
 
@@ -212,13 +226,13 @@ export class UIChat extends React.Component {
 
 
     async waitForConnection() {
-        this.alert('Đang kết nối máy chủ')
+        this.popChat('Đang kết nối máy chủ')
         let isConnected = await this.checkConnecting(10)
         if (isConnected) {
-            this.alert('Kết nối chat chung')
+            this.popChat('Tham gia kênh chung')
         }
         else {
-            this.alert('Không thể kết nối máy chủ')
+            this.popChat('Không thể kết nối máy chủ')
             this.field.setAttribute('disabled', '')
         }
     }
@@ -263,13 +277,13 @@ export class UIChat extends React.Component {
         })
     }
 
-    alert(msg) {
+    popChat(msg) {
         this.setState({ alert: msg })
     }
 
     onFocus() {
         // this.field.
-        
+
     }
 
     renderChat() {
@@ -328,6 +342,7 @@ export class DOMHelper {
     static findByID(id) {
         return document.getElementById(id)
     }
+
 }
 
 Number.prototype.toX000 = function () {
@@ -354,6 +369,105 @@ export class Device {
     static percentHeight(value) {
 
         return value * this.height / 100
+    }
+
+    static get os() {
+        let agent = navigator.userAgent
+        if (agent.search('Iphone') !== -1)
+            return 'iphone'
+        else if (agent.search('Android') !== -1)
+            return 'android'
+        else if (agent.search('Macintosh') !== -1)
+            return 'macos'
+        else if (agent.search('Windows') !== -1)
+            return 'windows'
+        else
+            return 'linux'
+    }
+}
+
+export class ProgressBar extends React.Component {
+
+    foregroundWidth = 0
+    state = {
+        progress: 0,
+        max: this.props.max || 100,
+        percent: 0,
+    }
+
+    get value() {
+        return this.state.progress
+    }
+
+    set value(v) {
+        this.foregroundWidth = value * max / this.game_Progress
+        this.setState({ process: v })
+    }
+
+    render() {
+        return <div style={{ width: this.props.width || 100, height: 4, border: '1px solid lightgray' }}>
+            <div ref={c => this.foreground = c} style={{ height: 2, margin: 1, width: this.foregroundWidth }} />
+        </div>
+    }
+}
+
+export class UIRoot extends React.Component {
+
+
+    state = {
+        alerts: []
+    }
+
+    add(item) {
+        let array = this.state.alerts
+        array.push(item)
+
+        this.setState({ alerts: array })
+    }
+
+
+
+    render() {
+        return <React.Fragment>
+            {
+                this.props.children
+            }
+            {
+                this.state.alerts.map((item, index) => <UIPopup key={index} ref={c => this[`popAlert${index}`] = c} style={{ marginTop: 0 }} >
+                    <div>
+                        <div style={{ borderBottom: '1px solid lightgray' }}>
+                            <span style={{ margin: 8, fontSize: 20 }} >{item.title}</span>
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: 10 }}>
+                            <span>{item.message}</span>
+                        </div>
+
+                        <div className='row-tab'>
+                            {action.map((item, index) => <button key={index} onClick={item.onClick}>{item.name}</button>)}
+                        </div>
+                    </div>
+                </UIPopup>)
+            }
+        </React.Fragment>
+    }
+}
+
+export class UIAlert extends React.Component {
+    render() {
+        return <UIPopup ref={c => this.self = c} style={{ marginTop: 0 }} >
+            <div>
+                <div style={{ borderBottom: '1px solid lightgray' }}>
+                    <span style={{ margin: 8, fontSize: 20 }} >{item.title}</span>
+                </div>
+                <div style={{ marginTop: 8, fontSize: 10 }}>
+                    <span>{item.message}</span>
+                </div>
+
+                <div className='row-tab'>
+                    {action.map((item, index) => <button key={index} onClick={item.onClick}>{item.name}</button>)}
+                </div>
+            </div>
+        </UIPopup>
     }
 }
 

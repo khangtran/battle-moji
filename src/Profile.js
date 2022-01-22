@@ -60,7 +60,7 @@ export default class Profile {
 
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                let data = new Profile('khangtran', 1000, 20, 'adasd123asdqe12fdg43')
+                let data = new Profile('playername', 1000, 20, 'adasd123asdqe12fdg43')
                 instance = data
                 resolve(data)
             }, 2500)
@@ -82,7 +82,8 @@ export default class Profile {
 
     }
 
-    static sync_profile() {
-
+    static save() {
+        localStorage.setItem('@profile', JSON.stringify(this))
+        console.log('save account')
     }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import SocialLogin from "react-social-login";
-import SocialButton, { UIPopup, UIPage } from "../Component";
+import SocialButton, { UIPopupText, UIPage } from "../Component";
 import Network from "../network";
 import NetworkInstance from "../network";
 import PageManager from "../PageManager";
@@ -27,7 +27,7 @@ export default class LoginPage extends React.Component {
             span2.style.marginTop = '10px'
             span2.style.fontSize = 20
             span2.style.color = 'gray'
-            span2.innerHTML = 'Opps! <br>Phiên bản hiện tại không hỗ trợ máy tính.'
+            span2.innerHTML = 'Lỗi hỗ trợ! <br>Phiên bản hiện tại không hỗ trợ máy tính.'
 
             root.appendChild(span)
             root.appendChild(span2)
@@ -96,21 +96,23 @@ export default class LoginPage extends React.Component {
                     width: '55%',
                 }} >
                     <span>Battle</span>
-                    <span style={{ textAlign: 'right' }} >Moji</span>
+                    <span style={{ textAlign: 'right' }} >Syaster</span>
                 </div>
 
                 <div style={{ alignSelf: 'center', width: '65%', marginBottom: '10%' }} >
 
-                    <span style={{ fontSize: 18 }} >Đăng nhập vào <span style={{ color: '#00a8b1' }} >Battle Moji </span> qua</span>
+                    <span style={{ fontSize: 18 }} >Đăng nhập <span style={{ color: '#00a8b1' }} >Battle Syaster </span> qua</span>
 
                     <div style={{ justifyContent: 'space-between', height: 200, marginTop: 20 }} >
-                        <div className='row' style={{ justifyContent: 'center' }} >
-                            <input ref={c => this.field_name = c} placeholder='Tên người chơi' type='text' autoCapitalize='none' />
-                            {/* <input ref={c => this.field_pass = c} placeholder='Mật khẩu' type='password' /> */}
-
-                            <div>
-                                <button className='bt no-border bt-customer-login' style={{ height: 42 }} onClick={() => this.onPressLogin()} >Khách</button>
+                        <div>
+                            <div className='row' style={{ justifyContent: 'center' }} >
+                                <input ref={c => this.field_name = c} placeholder='Tên người chơi' type='text' autoCapitalize='none' />
+                                {/* <input ref={c => this.field_pass = c} placeholder='Mật khẩu' type='password' /> */}
+                                <div>
+                                    <button className='bt no-border bt-customer-login' style={{ height: 42 }} onClick={() => this.onPressLogin()} >Khách</button>
+                                </div>
                             </div>
+                            <span style={{ fontSize: 13, marginTop: 8 }}>* Tùy chọn này không sao lưu tiến trình chơi</span>
                         </div>
 
                         <div>
@@ -134,7 +136,7 @@ export default class LoginPage extends React.Component {
                     </div>
                 </div>
 
-                <UIPopup ref={c => this.pop_loading = c} text='Đang kết nối máy chủ' />
+                <UIPopupText ref={c => this.pop_loading = c} text='Đang kết nối máy chủ' />
             </div>
         </UIPage>
     }
