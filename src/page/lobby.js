@@ -64,9 +64,8 @@ export default class LobbyPage extends UIPage {
     }
 
     render() {
-        let default_profile = ['/res/profile_me.jpg', '/res/profile_vy.jpg']
         let avatar_default = '/res/avatar_default.png'
-        let avatar = Profile.instance.name === 'vyvy' ? default_profile[1] : Profile.instance.name === 'khang' ? default_profile[0] : avatar_default
+        let avatar = Profile.instance.avatar === '' ? avatar_default : Profile.instance.avatar
 
         let data = this.state.data || 'Đang tải'
 

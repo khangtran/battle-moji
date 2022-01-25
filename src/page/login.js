@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext } from "react";
 import SocialLogin from "react-social-login";
 import SocialButton, { UIPopupText, UIPage } from "../Component";
 import Network from "../network";
@@ -11,26 +11,9 @@ export default class LoginPage extends React.Component {
     componentDidMount() {
 
         let agent = navigator.userAgent
-        if (agent.search('Iphone') === -1 && agent.search('Android') === -1) {
-            let root = document.getElementById('root')
-            root.removeChild(root.childNodes[0])
-
-            let span = document.createElement('span')
-
-            span.style.textAlign = 'center'
-            span.style.marginTop = '10%'
-            span.style.fontSize = 30
-            span.innerHTML = 'Syaster'
-
-            let span2 = document.createElement('span')
-            span2.style.textAlign = 'center'
-            span2.style.marginTop = '10px'
-            span2.style.fontSize = 20
-            span2.style.color = 'gray'
-            span2.innerHTML = 'Lỗi hỗ trợ! <br>Phiên bản hiện tại không hỗ trợ máy tính.'
-
-            root.appendChild(span)
-            root.appendChild(span2)
+        console.log('userAgent', agent)
+        if (agent.search('iPhone') === -1 && agent.search('Android') === -1) {
+            this.createElementDontSupport()
             return
         }
 
@@ -48,6 +31,28 @@ export default class LoginPage extends React.Component {
             }, 1500)
 
         }, 1000)
+    }
+
+    createElementDontSupport() {
+        let root = document.getElementById('root')
+        root.removeChild(root.childNodes[0])
+
+        let span = document.createElement('span')
+
+        span.style.textAlign = 'center'
+        span.style.marginTop = '10%'
+        span.style.fontSize = 30
+        span.innerHTML = 'Syaster'
+
+        let span2 = document.createElement('span')
+        span2.style.textAlign = 'center'
+        span2.style.marginTop = '10px'
+        span2.style.fontSize = 20
+        span2.style.color = 'gray'
+        span2.innerHTML = 'Lỗi hỗ trợ! <br>Phiên bản hiện tại không hỗ trợ máy tính.'
+
+        root.appendChild(span)
+        root.appendChild(span2)
     }
 
     async onPressLogin() {
